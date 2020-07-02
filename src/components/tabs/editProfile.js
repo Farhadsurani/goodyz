@@ -27,7 +27,8 @@ export default class EditProfileCmp extends Component {
         <TouchableOpacity style={{marginRight:10}} activeOpacity={0.5} onPress={()=> navigation.getParam('popScreen')()}>
           <Text style={{color:color.blue}}>Done</Text>
         </TouchableOpacity>
-      )
+      ),
+      headerLeft:(<></>)
 		// };
 		// title: 'Dashboard',
 		// headerTintColor: theme.color.ligth,
