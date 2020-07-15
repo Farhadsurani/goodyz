@@ -11,11 +11,22 @@ class Button extends Component {
 
   //btnColor='#986aa7'
   render(){
-    const { onPress, btnName, isDisable=false, width=ms(250) } = this.props;
+    const { onPress, btnName, isDisable=false, width=ms(250), borderRadius=0, textColor='#ffffff' } = this.props;
     const { buttonStyle, text } = styles;
     return (
-      <TouchableOpacity style={[buttonStyle, {backgroundColor:this.props.btnColor, width:width}]} onPress={onPress} activeOpacity={0.5}  disabled={isDisable}>
-        <Text style={text}>
+      <TouchableOpacity 
+        style={[
+          buttonStyle, 
+          {
+            backgroundColor:this.props.btnColor, 
+            width:width, borderRadius:borderRadius
+          }
+        ]} 
+        onPress={onPress} 
+        activeOpacity={0.5}  
+        disabled={isDisable}
+      >
+        <Text style={[text, {color:textColor}]}>
           {btnName}
         </Text>
       </TouchableOpacity>
@@ -31,7 +42,7 @@ const styles = ScaledSheet.create({
     color: '#ffffff',
   },
   buttonStyle: {
-    marginTop:'20@ms',
+    // marginTop:'20@ms',
     borderRadius:'5@ms',
     height:'40@ms',
     flexDirection:'row',

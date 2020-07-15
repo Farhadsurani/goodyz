@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, ScrollView, Text, Dimensions } from "react-native";
+import { View, Image, ScrollView, Text, Dimensions, AsyncStorage } from "react-native";
 
 import { images, color } from '../../constants/theme';
 import { FloatingInput, Button } from '../common';
@@ -7,6 +7,10 @@ import { FloatingInput, Button } from '../common';
 import { ScaledSheet, ms } from 'react-native-size-matters';
 import Toast from 'react-native-easy-toast';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+
 
 const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
 
@@ -41,8 +45,35 @@ export default class Signin extends Component {
       });
       this.erPassword.isError = true;
     }
-    else {  
-      this.props.navigation.navigate('Tabs');
+    else {
+      if (this.state.username == 'user' || this.state.username == 'shop') {
+        try {
+          const userState = await AsyncStorage.setItem('isUserLogedIn', 'true');
+          const userType = await AsyncStorage.setItem('userType', this.state.username);
+          // const resetAction = StackActions.reset({
+          //   index: 0,
+          //   key: null,
+          //   actions: [NavigationActions.navigate({ routeName: 'QrcodeCmp' })],
+          // });
+          // this.props.navigation.dispatch(resetAction);
+          if(this.state.username == 'user')
+            this.props.navigation.navigate('Tabs')
+          else
+            this.props.navigation.navigate('TabsShop')
+        }
+        catch(e){
+          console.log(e)
+        }
+      }
+      else {
+        this.setState({
+          error: 'Only enter shop or user in username field.',
+          refs: this.erUsername
+        });
+        this.erPassword.isError = true;
+      }
+      // this.props.navigation.navigate('Tabs');
+      
       // this.setState({visible:true, error:''})
       // var postData = {
       //   Email: this.state.email,
@@ -75,11 +106,20 @@ export default class Signin extends Component {
     this.props.navigation.navigate('Signup');
   }
 
+  back = () => {
+    this.props.navigation.navigate('QrCode');
+  }
+
   render(){
     const { mainContainer, imageContainer, formContainer } = styles;
 
     return(
       <ScrollView>
+        <View style={{position:'absolute', left:10, top:10, zIndex:9}}>
+          <TouchableOpacity activeOpacity={0.5} onPress={this.back}>
+            <FontAwesomeIcon icon={faArrowLeft} size={22} color={color.orange} />
+          </TouchableOpacity>
+        </View>
         <View style={mainContainer}>
           <View style={imageContainer}>
             <Image source={images.logo} resizeMode={'contain'} style={{width:100, height:100}}/>

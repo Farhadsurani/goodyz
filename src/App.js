@@ -3,13 +3,15 @@ import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 
 import Splash from './components/splash';
 import AuthStack from './navigation/authStack';
+import TabsStackShop from './navigation/tabsStackShop';
 import TabsStack from './navigation/tabsStack';
 
 const RootNavigator = createSwitchNavigator(
   {
     Splash: Splash,
     Auth: AuthStack,
-    Tabs: TabsStack
+    Tabs: TabsStack,
+    TabsShop: TabsStackShop
   },
   {
     initialRouteParams: 'Splash'

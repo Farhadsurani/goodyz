@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions, AsyncStorage } from 'react-native';
 
 import { color, images } from '../../constants/theme';
 
@@ -33,6 +33,42 @@ export default class ProfileCmp extends Component {
 		}
   };
   
+  constructor(props){
+    super(props);
+  }
+
+  async componentDidMount() {
+    this.focusListener = this.props.navigation.addListener("didFocus", async() => {
+      const isUserLogedIn = await this.checkUserLoggedIn();
+      console.log('isUserLogedIn', isUserLogedIn)
+      if(!isUserLogedIn){
+        this.props.navigation.pop();
+        this.props.navigation.navigate('Signin');
+      }
+      console.log(isUserLogedIn);
+    });
+  }
+
+  checkUserLoggedIn = async () => {
+    try {
+      const value = await AsyncStorage.getItem('isUserLogedIn')
+      if(value == null || value == false)
+        return false;
+      else
+        return true;
+    } 
+    catch(e) {
+      console.log(e);
+    }
+  }
+
+  logout = async() => {
+    console.log('logout')
+    await AsyncStorage.removeItem('isUserLogedIn');
+    await AsyncStorage.removeItem('userType');
+    this.props.navigation.navigate('QrCode');
+  }
+
   render(){
     const { mainContainer, profilePicture, profileName, profileEmail, hrLine } = styles;
 
@@ -56,7 +92,7 @@ export default class ProfileCmp extends Component {
               <Text style={{marginLeft:20, fontSize:18, color:color.blue}}>Delete Account</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.5}>
+          <TouchableOpacity activeOpacity={0.5} onPress={this.logout}>
             <View style={{flexDirection:'row', justifyContent:'flex-start', alignItems:'center', marginBottom:20}}>
               <FontAwesomeIcon icon={faSignOutAlt} size={20} color={color.darkGrey} />
               <Text style={{marginLeft:20, fontSize:18, color:color.orange}}>Logout</Text>

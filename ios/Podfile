@@ -36,6 +36,8 @@ target 'Goodzy' do
 
   pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
 
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
+
   target 'GoodzyTests' do
     inherit! :search_paths
     # Pods for testing

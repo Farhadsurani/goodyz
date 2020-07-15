@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Animated, Easing, Image } from "react-native";
+import { View, Text, Animated, Easing, Image, AsyncStorage } from "react-native";
 
 class Splash extends React.Component {
   constructor(props) {
@@ -15,22 +15,29 @@ class Splash extends React.Component {
       showBtn: false,
     };
     this.rotateAnimation();
+    this.navigate();
+  }
+  
+  async navigate() {
+    const stack = await AsyncStorage.getItem('userType');
     setTimeout(()=> {
-      console.log('Settimeout')
-      this.props.navigation.navigate('Auth')
+      if(stack == 'shop')
+        this.props.navigation.navigate('TabsShop')
+      else
+        this.props.navigation.navigate('Tabs')
     }, 3000)
   }
-    
+
   async componentDidMount() {
     const data = await this.performTimeConsumingTask();
   }
 
   performTimeConsumingTask = async () => {
     // return new Promise(resolve =>
-    setTimeout(() => {
-      this.props.navigation.navigate('Auth')
-      // resolve("result");
-    }, 3000)
+    // setTimeout(() => {
+    //   this.props.navigation.navigate('Main')
+    //   // resolve("result");
+    // }, 3000)
     // );
   };
 

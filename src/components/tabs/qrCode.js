@@ -4,10 +4,10 @@ import { Text, StyleSheet, TouchableOpacity, View, Dimensions, ImageBackground }
 import { color, images } from '../../constants/theme';
 
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { RNCamera } from 'react-native-camera';
+// import { RNCamera } from 'react-native-camera';
 
 const { height:deviceHeigth, width:deviceWidth } = Dimensions.get('screen');
-
+let timeout = '';
 export default class QrCodeCmp extends Component {
 
   static navigationOptions = ({ navigation }) => {
@@ -16,8 +16,17 @@ export default class QrCodeCmp extends Component {
 		}
   };
   
+  constructor(props) {
+    super(props);
+    // timeout = setTimeout(()=> {
+    //   this.props.navigation.navigate('QrDetailCmp')
+    // },9000)
+  }
+  
   onSuccess = e => {
-    console.log(e.data)
+    console.log(e.data);
+    clearTimeout(timeout);
+    this.props.navigation.navigate('QrDetailCmp');
   };
 
   render(){

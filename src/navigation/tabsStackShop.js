@@ -5,27 +5,30 @@ import { createStackNavigator } from 'react-navigation-stack';
 
 import { TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faWallet, faQrcode, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSignal, faQrcode, faUser } from '@fortawesome/free-solid-svg-icons';
 
-import WalletCmp from '../components/tabs/wallet';
+import AnalyticsCmp from '../components/tabs/analytics';
 import QrCodeCmp from '../components/tabs/qrCode';
 import ProfileCmp from '../components/tabs/profile';
 import EditProfileCmp from '../components/tabs/editProfile';
 import ChangePasswordCmp from '../components/tabs/chnagePassword';
-import VoucherDetailCmp from '../components/tabs/voucherDetail';
 import QrDetailCmp from '../components/tabs/qrDetail';
 import GoodyzListCmp from '../components/tabs/goodyzList';
+import VoucherDetailCmp from '../components/tabs/voucherDetail';
+import TotalVouchersRedeemedCmp from '../components/tabs/totalVouchersRedeemed';
+import SingleVoucherReportCmp from '../components/tabs/singleVoucherReport';
 
 import { color } from '../constants/theme';
 
-const Wallet = 
+const Analytics = 
   createStackNavigator(
     {
-      WalletCmp,
-      VoucherDetailCmp
+        AnalyticsCmp,
+        TotalVouchersRedeemedCmp,
+        SingleVoucherReportCmp
     },
     {
-      initialRouteParams: 'WalletCmp',
+      initialRouteParams: 'AnalyticsCmp',
       navigationOptions: ({navigation}) => {
         let { routeName } = navigation.state.routes[navigation.state.index];
         let navigationOptions = {
@@ -33,21 +36,21 @@ const Wallet =
             if (tintColor === color.yellow) {
               return (
                 <TouchableOpacity>
-                  <FontAwesomeIcon icon={faWallet} size={20} color={color.yellow} />
+                  <FontAwesomeIcon icon={faSignal} size={20} color={color.yellow} />
                 </TouchableOpacity>
               );
             } else {
               return (
-                <FontAwesomeIcon icon={faWallet} size={18} color={color.darkGrey} />
+                <FontAwesomeIcon icon={faSignal} size={18} color={color.darkGrey} />
               );
             }
           }
         };
     
-        if (routeName === 'VoucherDetailCmp')
+        if (routeName === 'TotalVouchersRedeemedCmp')
           navigationOptions.tabBarVisible = false;
-        // }else if (routeName === 'CategoryScreen'){
-        //   navigationOptions.tabBarVisible = false;
+        else if (routeName === 'SingleVoucherReportCmp')
+          navigationOptions.tabBarVisible = false;
         // }else if (routeName === 'RestaurantScreen'){
         //   navigationOptions.tabBarVisible = false;
         // }
@@ -67,7 +70,7 @@ const QrCode =
       QrDetailCmp,
       GoodyzListCmp,
       VoucherDetailCmp,
-      // Signin
+    //   Signin
     },
     {
       initialRouteParams: 'QrCodeCmp',
@@ -148,9 +151,9 @@ const Profile =
     }
   );
 
-const TabsStack = createBottomTabNavigator(
+const TabsStackShop = createBottomTabNavigator(
   {
-    Wallet: Wallet,
+    Analytics: Analytics,
     QrCode: QrCode,
     Profile: Profile,
   },
@@ -187,4 +190,4 @@ const TabsStack = createBottomTabNavigator(
   }
 );
 
-export default createAppContainer(TabsStack);
+export default createAppContainer(TabsStackShop);
