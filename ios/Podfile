@@ -34,7 +34,9 @@ target 'Goodzy' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
+  # pod 'RNPermissions', :path => '../node_modules/react-native-permissions/ios'
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'Permission-Camera', :path => "../node_modules/react-native-permissions/ios/Camera.podspec"
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 

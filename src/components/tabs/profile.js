@@ -16,15 +16,18 @@ export default class ProfileCmp extends Component {
 			headerTitle: (
 				<View style={{width:'100%', justifyContent:'center', alignItems:'center', backgroundColor:color.primary, flexDirection:'row'}}>
 					<Text style={{fontSize: 20, color:color.dark}}>Profile</Text>
-          <TouchableOpacity style={{position:'absolute', right:5}} activeOpacity={0.5} onPress={()=>navigation.navigate('EditProfileCmp')}>
-            <Text style={{color:color.blue}}>Edit</Text>
-          </TouchableOpacity>
-				</View>
+        </View>
 			),
 			headerTitleStyle: { flex: 1, textAlign: "center" },
 			headerStyle: {
 				backgroundColor: color.primary
-			}
+      },
+      headerRight:(
+        <TouchableOpacity style={{marginRight:10}} activeOpacity={0.5} onPress={()=>navigation.navigate('EditProfileCmp')}>
+          <Text style={{color:color.blue}}>Edit</Text>
+        </TouchableOpacity>
+      ),
+      headerLeft:(<></>)
 		// };
 		// title: 'Dashboard',
 		// headerTintColor: theme.color.ligth,
