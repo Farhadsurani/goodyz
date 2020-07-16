@@ -99,7 +99,7 @@ export default class SingleVoucherReportCmp extends Component {
           
           <View style={{borderTopWidth:1, borderTopColor:color.ligthGrey,}}>
             <FlatList
-              pagingEnabled={false}            
+              pagingEnabled={false}
               showsVerticalScrollIndicator={false}
               data={data}
               renderItem={this.renderData}
