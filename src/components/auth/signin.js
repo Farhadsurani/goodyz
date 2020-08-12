@@ -64,6 +64,7 @@ export default class Signin extends Component {
           try {
             const userState = await AsyncStorage.setItem('isUserLogedIn', 'true');
             const userData = await AsyncStorage.setItem('userData', JSON.stringify(res.data.data.user));
+            const access_token = await AsyncStorage.setItem('access_token',res.data.data.user.access_token);
             this.props.navigation.navigate('Tabs')
             // if(this.state.email == 'user')
             //   this.props.navigation.navigate('Tabs')

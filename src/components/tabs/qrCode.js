@@ -48,7 +48,7 @@ export default class QrCodeCmp extends Component {
     setTimeout(()=> {
       this.scanner.reactivate()
     }, 30000);
-    const access_token = JSON.parse(userData).access_token;
+    const access_token = await AsyncStorage.getItem('access_token');
     
     this.setState({showSpinner:true});
     axios.defaults.headers.common['Authorization'] = 'Bearer '+access_token;
