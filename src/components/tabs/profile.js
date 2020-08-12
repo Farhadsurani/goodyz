@@ -78,10 +78,10 @@ export default class ProfileCmp extends Component {
 
   logout = async() => {
     this.setState({showSpinner:true});
-    const userData = await AsyncStorage.getItem('userData');
+    const user_access_token = await AsyncStorage.getItem('access_token');
     let access_token = {
       headers: {
-        'Authorization': 'Bearer '+JSON.parse(userData).access_token
+        'Authorization': 'Bearer '+user_access_token
       }
     };
     axios.post('https://kanztainer.com/goodyz/api/v1/logout', {}, access_token).then(

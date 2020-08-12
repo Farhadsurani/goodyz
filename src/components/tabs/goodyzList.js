@@ -57,10 +57,10 @@ export default class GoodyzListCmp extends Component {
   
   async refreshUser() {
     console.log('refreshUser');
-    const user = await AsyncStorage.getItem('userData');
+    const access_token = await AsyncStorage.getItem('access_token');
     const header = {
       headers: {
-        'Authorization': 'Bearer '.concat(JSON.parse(user).access_token)
+        'Authorization': 'Bearer '.concat(access_token)
       }
     }
     const url = 'https://kanztainer.com/goodyz/api/v1/me'

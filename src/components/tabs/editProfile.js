@@ -104,10 +104,10 @@ export default class EditProfileCmp extends Component {
       }, 3000)
     }
     else {
-      // const userData = await AsyncStorage.getItem('userData');
+      const user_access_token = await AsyncStorage.getItem('access_token');
       const access_token = {
         headers: { 
-          'Authorization': 'Bearer '.concat(this.state.userData.access_token) 
+          'Authorization': 'Bearer '.concat(user_access_token)
         }
       };
       const url = 'https://kanztainer.com/goodyz/api/v1/users/'+this.state.userData.id;

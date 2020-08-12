@@ -95,8 +95,7 @@ export default class ChangePasswordCmp extends Component {
       this.erPassword_confirmation.isError = true;
     }
     else {
-      const userData = await AsyncStorage.getItem('userData');
-      const access_token = JSON.parse(userData).access_token;
+      const access_token = await AsyncStorage.getItem('access_token');
       const AuthStr = 'Bearer '.concat(access_token); 
       console.log(AuthStr)
       const url = 'https://kanztainer.com/goodyz/api/v1/change-password?current_password='+this.state.current_password+'&password='+this.state.password+'&password_confirmation='+this.state.password_confirmation;

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, AsyncStorage } from 'react-native';
 
 import { ImageCard, Button } from '../common';
 import { color } from '../../constants/theme';
@@ -42,6 +42,8 @@ export default class VoucherDetailCmp extends Component {
       isAddWalletMsg:false,
       isAddWalletBtn:false,
       data:this.props.navigation.getParam('data'),
+      showSpinner:false,
+      showAlert:false,
     }
   }
 
@@ -53,30 +55,40 @@ export default class VoucherDetailCmp extends Component {
     this.setState({isRedeemed:!this.state.isRedeemed})
   }
 
-  addToWallet= () => {
-    // console.log('addtowallet')
-    this.setState({showSpinner:true});
-    const userData = await AsyncStorage.getItem('userData');
-    let access_token = {
-      headers: {
-        'Authorization': 'Bearer '+JSON.parse(userData).access_token
-      }
-    };
-    axios.post('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.id+'&is_wallet=1', {}, access_token).then(
-      async(res)=> {
-        console.log(res.data);
-        this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
-        setTimeout(()=> {
-          this.setState({isAddWalletMsg:false})
-        }, 5000)
-      }
-    ).catch(
-     async  (error)=> {
-        this.setState({showSpinner: false});
-        console.log('error', error);
-        this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
-      }
-    );
+  handleCancel() {
+    this.setState({showAlert:false});
+  }
+
+  addToWallet= async () => {
+    if(!this.state.isAddWalletBtn){
+      this.setState({showSpinner:true});
+      const user_access_token = await AsyncStorage.getItem('access_token');
+      let access_token = {
+        headers: {
+          'Authorization': 'Bearer '.concat(user_access_token)
+        }
+      };
+      console.log(access_token, this.state.data.id);
+      axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.id+'&is_wallet=1', access_token).then(
+        async(res)=> {
+          console.log(res.data);
+          this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
+          setTimeout(()=> {
+            this.setState({isAddWalletMsg:false})
+          }, 5000)
+        }
+      ).catch(
+      async  (error)=> {
+          this.setState({showSpinner: false});
+          console.log('error', error);
+          this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
+        }
+      );
+    }
+    else {
+      console.log('else')
+      this.props.navigation.navigate('WalletCmp')
+    }
   }
   render(){
     const { mainContainer, btnContainer, horizontal, spinnerTextStyle } = styles;
@@ -129,8 +141,7 @@ export default class VoucherDetailCmp extends Component {
               isDisable={this.state.isRedeemed}
             />
           }
-        </View>
-        <View style={horizontal}>
+          <View style={horizontal}>
           <Spinner 
             textContent={'Loading...'}
             animation='fade'
@@ -145,6 +156,7 @@ export default class VoucherDetailCmp extends Component {
           </Dialog.Description>
           <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
         </Dialog.Container>
+        </View>
       </View>
     )
   }
