@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, ScrollView, Image } from 'react-native';
 
 import { ImageCard, Button } from '../common';
 import { color } from '../../constants/theme';
@@ -8,7 +8,9 @@ import { data } from '../../constants/data';
 import { ScaledSheet } from 'react-native-size-matters';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
- 
+
+const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
+
 export default class QrDetailCmp extends Component {
 
   static navigationOptions = ({ navigation }) => {
@@ -33,7 +35,10 @@ export default class QrDetailCmp extends Component {
   constructor(props){
     super(props);
     this.state = {
-      isRedeemed:false
+      isRedeemed:false,
+      data: this.props.navigation.getParam('data').data,
+      width:'',
+      height:''
     }
   }
 
@@ -42,7 +47,7 @@ export default class QrDetailCmp extends Component {
   }
 
   detail = () => {
-    this.props.navigation.navigate('GoodyzListCmp');
+    this.props.navigation.navigate('GoodyzListCmp', {data: this.state.data.offers});
   }
 
   render(){
@@ -53,15 +58,16 @@ export default class QrDetailCmp extends Component {
         <ScrollView style={{backgroundColor:color.ligth}}>
           <View style={mainContainer}>
             <ImageCard 
-              logo={data[1].logo} 
-              text={data[1].text}  
-              bigImage={data[1].bigImage}
+              logo={{uri:this.state.data.logo_url}} 
+              text={this.state.data.name}
+              bigImage={{uri:this.state.data.banner_image_url}}
               isRedeemed={data[1].isRedeemed}
               // onPress={this.gotoDetail}
               isDetail={true}
               expire={data[1].expire}
-              description={data[1].description}
-              isRedeemed={this.state.isRedeemed}
+              description={this.state.data.description}
+              height={200}
+              // isRedeemed={this.state.isRedeemed}
             />
           </View>
         </ScrollView>
@@ -77,7 +83,6 @@ export default class QrDetailCmp extends Component {
           />
         </View>
       </View>
-      
     )
   }
 }

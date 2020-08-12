@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Image, FlatList, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Image, FlatList, ScrollView, AsyncStorage } from 'react-native';
 
 import { color } from '../../constants/theme';
-import { data } from '../../constants/data';
 
+import axios from 'axios';
 import { ScaledSheet } from 'react-native-size-matters';
 
 const { width:deviceWidth, height:deviceHeight } = Dimensions.get('screen');
@@ -30,28 +30,59 @@ export default class GoodyzListCmp extends Component {
   };
 
   constructor(props) {
-    super(props)
+    super(props);
+    this.state = {
+      data: this.props.navigation.getParam('data')
+    }
   }
 
   trimText(string) {
     return string.substring(0, 110)+'...';
   }
 
-  voucherDetail = () => {
-    this.props.navigation.navigate('VoucherDetailCmp', {type:'addWallet'})
+  voucherDetail = (data) => {
+    this.addImpresion(data.id);
+    this.props.navigation.navigate('VoucherDetailCmp', {type:'addWallet', data:data});
+  }
+  
+  addImpresion(id) {
+    console.log(id)
+    axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+id+'&is_clicked=1').then((res)=> {
+      console.log(res.data);
+      this.refreshUser();
+    }).catch((error)=> {
+      console.log('error', error);
+    });
+  }
+  
+  async refreshUser() {
+    console.log('refreshUser');
+    const user = await AsyncStorage.getItem('userData');
+    const header = {
+      headers: {
+        'Authorization': 'Bearer '.concat(JSON.parse(user).access_token)
+      }
+    }
+    const url = 'https://kanztainer.com/goodyz/api/v1/me'
+    axios.post(url, header).then(async(res)=> {
+      console.log(res.data.data);
+      await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
+    }).catch((error)=> {
+      console.log('error', error);
+    });
   }
 
   renderData = (item, index) => {
     const { mainContainer, logo, heading, description, expiry } = styles;
     return(
-      <TouchableOpacity activeOpacity={0.5} onPress={this.voucherDetail}>
+      <TouchableOpacity activeOpacity={0.5} onPress={() => this.voucherDetail(item.item)}>
         <View style={mainContainer}>
-          <Image style={logo} source={item.item.logo} />
+          <Image style={logo} source={{uri:item.item.sponser.logo_url}} />
           <View style={{flexDirection:'column', width:'80%', marginLeft:10}}>
-            <Text style={heading}>{item.item.text}</Text>
+            <Text style={heading}>{item.item.title}</Text>
             <View style={{flexDirection:'row'}}>
               <Text style={{fontSize:16,}}>Exp</Text>
-              <Text style={expiry}>{item.item.expire}</Text>
+              <Text style={expiry}>{item.item.expiration_date}</Text>
             </View>
             <Text style={description}>
               {this.trimText(item.item.description)}
@@ -71,7 +102,7 @@ export default class GoodyzListCmp extends Component {
         <FlatList
           pagingEnabled={false}            
           showsVerticalScrollIndicator={false}
-          data={data}
+          data={this.state.data}
           renderItem={this.renderData}
           keyExtractor={(item, index) => index.toString()}
         />

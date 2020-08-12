@@ -9,7 +9,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
 
 // Make a component
-const ImageCard = ({logo, text, bigImage, isRedeemed = false, onPress, isDetail = false, expire, description}) => {
+const ImageCard = ({logo, text, bigImage, isRedeemed = false, onPress, isDetail = false, expire, description, height}) => {
   const {mainContainer, imageContainer, image, shortTag, saleImage} = styles;
 
   return (
@@ -21,11 +21,13 @@ const ImageCard = ({logo, text, bigImage, isRedeemed = false, onPress, isDetail 
           </View>
           <Text style={shortTag}>{text}</Text>
         </View>
-        <Image resizeMode={'cover'} source={bigImage} style={saleImage} />
+        <View style={{elevation:1, marginLeft:5}}>
+          <Image resizeMode={'contain'} source={bigImage} style={[saleImage, {height:height}]} />
+        </View>
       
       {
         isDetail?
-        <View style={{flexDirection:'column'}}>
+        <View style={{flexDirection:'column', width:deviceWidth}}>
           <View style={{flexDirection:'row', justifyContent:'space-between', marginVertical:20}}>
             <Text style={{fontSize:16, fontWeight:'bold', color:color.dark, marginLeft:15}}>Expiration Date</Text>
             <Text style={{fontSize:16, color:color.darkGrey, marginRight:15}}>{expire}</Text>
@@ -76,6 +78,7 @@ const styles = ScaledSheet.create({
   },
   saleImage:{
     width:deviceWidth-30,
+    // height:height,
     borderRadius:10,
   }
 });

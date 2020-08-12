@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { View, Image, ScrollView, Text, Dimensions, AsyncStorage } from "react-native";
+import { View, Image, ScrollView, Text, Dimensions, AsyncStorage, TouchableOpacity } from "react-native";
 
 import { images, color } from '../../constants/theme';
 import { FloatingInput, Button } from '../common';
 
 import { ScaledSheet, ms } from 'react-native-size-matters';
 import Toast from 'react-native-easy-toast';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import Spinner from 'react-native-loading-spinner-overlay';
+import Dialog from "react-native-dialog";
+import axios from 'axios';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -19,10 +21,16 @@ export default class Signin extends Component {
   constructor(props){
     super(props);
     this.state = {
-      username:'',
-      password:'',
+      email:'admin@boilerplate.com',
+      password:'admin123',
+      device_type:'android',
+      device_token:'123',
       refs: undefined,
       error: '',
+      showSpinner:false,
+      showAlert:false,
+      errorMsg:'',
+      errorTitle:'',
     }
   }
 
@@ -31,12 +39,12 @@ export default class Signin extends Component {
       this.state.refs.isError = false;
     }
 
-    if (!this.state.username) {
+    if (!this.state.email) {
       this.setState({
-        error: 'Please Enter Username',
-        refs: this.erUsername
+        error: 'Please Enter email',
+        refs: this.eremail
       });
-      this.erUsername.isError = true;
+      this.eremail.isError = true;
     }
     else if (!this.state.password) {
       this.setState({
@@ -46,59 +54,36 @@ export default class Signin extends Component {
       this.erPassword.isError = true;
     }
     else {
-      if (this.state.username == 'user' || this.state.username == 'shop') {
-        try {
-          const userState = await AsyncStorage.setItem('isUserLogedIn', 'true');
-          const userType = await AsyncStorage.setItem('userType', this.state.username);
-          // const resetAction = StackActions.reset({
-          //   index: 0,
-          //   key: null,
-          //   actions: [NavigationActions.navigate({ routeName: 'QrcodeCmp' })],
-          // });
-          // this.props.navigation.dispatch(resetAction);
-          if(this.state.username == 'user')
+      this.setState({showSpinner:true});
+      axios.post('https://kanztainer.com/goodyz/api/v1/login', this.state).then(
+      async (res)=> {
+        console.log(res.data.data.user);
+        console.log(res.data.success)
+        this.setState({showSpinner:false});
+        if(res.data.success == true) {
+          try {
+            const userState = await AsyncStorage.setItem('isUserLogedIn', 'true');
+            const userData = await AsyncStorage.setItem('userData', JSON.stringify(res.data.data.user));
             this.props.navigation.navigate('Tabs')
-          else
-            this.props.navigation.navigate('TabsShop')
+            // if(this.state.email == 'user')
+            //   this.props.navigation.navigate('Tabs')
+            // else
+            //   this.props.navigation.navigate('TabsShop')
+          }
+          catch(e){
+            console.log('Error storing user data', e);
+            this.setState({showSpinner:false});
+          }
         }
-        catch(e){
-          console.log(e)
+        else {
+          this.setState({showAlert:true, errorMsg:'Wrong username or password.', errorTitle:'Error!!'})
         }
-      }
-      else {
-        this.setState({
-          error: 'Only enter shop or user in username field.',
-          refs: this.erUsername
-        });
-        this.erPassword.isError = true;
-      }
-      // this.props.navigation.navigate('Tabs');
-      
-      // this.setState({visible:true, error:''})
-      // var postData = {
-      //   Email: this.state.email,
-      //   Password: this.state.password
-      // };
-
-      // axios.post('http://app.talkthetaste.com/api/login',postData, {
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'token': 'ttt@9500',
-      //   },      
-      // })      
-      // .then(async(response) => {
-      //   this.setState({visible:false})
-      //   console.log('response',response.data)
-      //   await AsyncStorage.setItem('userId', response.data.userDetails.UserId.toString())
-      //   this.props.navigation.navigate('Signup');
-      // })
-      // .catch((error) => {
-      //   this.setState({visible:false})
-      //   console.log('error',error)
-      //   this.refs.toast.show(error.response.data.message, 100, () => {
-          
-      //   })
-      // })
+      }).catch(
+        (error)=> {
+          console.log('error', error);
+          this.setState({showSpinner:false, showAlert:true, errorMsg:'Something went wrong.', errorTitle:'Server Error!!'})
+        }
+      );
     }
   }
 
@@ -110,8 +95,12 @@ export default class Signin extends Component {
     this.props.navigation.navigate('QrCode');
   }
 
+  handleCancel() {
+    this.setState({showAlert:false});
+  }
+
   render(){
-    const { mainContainer, imageContainer, formContainer } = styles;
+    const { mainContainer, imageContainer, formContainer, horizontal, spinnerTextStyle } = styles;
 
     return(
       <ScrollView>
@@ -132,11 +121,11 @@ export default class Signin extends Component {
               margin={ms(9)}
               width={ms(250)} 
               keyboardType={'email-address'}
-              label={'Name'} 
-              value={this.state.username}
-              ref={ref => this.erUsername = ref}
+              label={'Email'} 
+              value={this.state.email}
+              ref={ref => this.eremail = ref}
               onChangeText={text => {
-                  this.setState({ username: text });
+                  this.setState({ email: text });
               }}
             />
             <FloatingInput
@@ -180,6 +169,21 @@ export default class Signin extends Component {
           opacity={0.8}
           textStyle={{color:'#000',textAlign:'center', fontFamily:'JosefinSans-Regular'}}
         />
+         <View style={horizontal}>
+          <Spinner 
+            textContent={'Loading...'}
+            animation='fade'
+            textStyle={spinnerTextStyle}
+            visible={this.state.showSpinner}
+          />
+        </View>
+        <Dialog.Container visible={this.state.showAlert} >
+          <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
+          <Dialog.Description>
+            {this.state.errorMsg}
+          </Dialog.Description>
+          <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
+        </Dialog.Container>
       </ScrollView>
     )
   }
@@ -205,5 +209,14 @@ const styles = ScaledSheet.create({
   },
   formContainer:{
     marginTop:50
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
+  },
+  horizontal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
   }
 });

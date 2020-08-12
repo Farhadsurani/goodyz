@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity, Image, Dimensions, AsyncStorage } from 'r
 
 import { color, images } from '../../constants/theme';
 
+import Spinner from 'react-native-loading-spinner-overlay';
+import Dialog from "react-native-dialog";
+import axios from 'axios';
 import {ScaledSheet, ms} from 'react-native-size-matters';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faKey, faTrash, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
@@ -38,6 +41,10 @@ export default class ProfileCmp extends Component {
   
   constructor(props){
     super(props);
+    this.state = {
+      showSpinner:false,
+      showAlert:false,
+    }
   }
 
   async componentDidMount() {
@@ -65,15 +72,42 @@ export default class ProfileCmp extends Component {
     }
   }
 
+  handleCancel() {
+    this.setState({showAlert:false});
+  }
+
   logout = async() => {
-    console.log('logout')
-    await AsyncStorage.removeItem('isUserLogedIn');
-    await AsyncStorage.removeItem('userType');
-    this.props.navigation.navigate('QrCode');
+    this.setState({showSpinner:true});
+    const userData = await AsyncStorage.getItem('userData');
+    let access_token = {
+      headers: {
+        'Authorization': 'Bearer '+JSON.parse(userData).access_token
+      }
+    };
+    axios.post('https://kanztainer.com/goodyz/api/v1/logout', {}, access_token).then(
+      async(res)=> {
+        console.log(res.data);
+        this.setState({showSpinner:false});
+        await AsyncStorage.removeItem('isUserLogedIn');
+        await AsyncStorage.removeItem('userType');
+        await AsyncStorage.removeItem('userData');
+        this.props.navigation.navigate('QrCode');
+      }
+    ).catch(
+     async  (error)=> {
+        this.setState({showSpinner: false});
+        console.log('error', error);
+        await AsyncStorage.removeItem('isUserLogedIn');
+        await AsyncStorage.removeItem('userType');
+        await AsyncStorage.removeItem('userData');
+        this.props.navigation.navigate('QrCode');
+        this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
+      }
+    );
   }
 
   render(){
-    const { mainContainer, profilePicture, profileName, profileEmail, hrLine } = styles;
+    const { mainContainer, profilePicture, profileName, profileEmail, hrLine, horizontal, spinnerTextStyle } = styles;
 
     return(
       <View style={mainContainer}>
@@ -102,6 +136,21 @@ export default class ProfileCmp extends Component {
             </View>
           </TouchableOpacity>
         </View>
+        <View style={horizontal}>
+          <Spinner 
+            textContent={'Loading...'}
+            animation='fade'
+            textStyle={spinnerTextStyle}
+            visible={this.state.showSpinner}
+          />
+        </View>
+        <Dialog.Container visible={this.state.showAlert} >
+          <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
+          <Dialog.Description>
+            {this.state.errorMsg}
+          </Dialog.Description>
+          <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
+        </Dialog.Container>
       </View>
     )
   }
@@ -134,5 +183,14 @@ const styles = ScaledSheet.create({
     borderBottomColor:color.ligthGrey,
     borderBottomWidth:2,
     width:'90%'
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
+  },
+  horizontal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
   }
 })
