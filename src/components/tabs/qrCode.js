@@ -18,9 +18,9 @@ export default class QrCodeCmp extends Component {
   
   constructor(props) {
     super(props);
-    // timeout = setTimeout(()=> {
-    //   this.props.navigation.navigate('QrDetailCmp')
-    // },9000)
+    timeout = setTimeout(()=> {
+      this.props.navigation.navigate('QrDetailCmp')
+    },9000)
   }
   
   onSuccess = e => {

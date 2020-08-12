@@ -683,6 +683,7 @@
 				DEVELOPMENT_TEAM = GXL72LV45C;
 				INFOPLIST_FILE = Goodzy/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -703,6 +704,7 @@
 				DEVELOPMENT_TEAM = GXL72LV45C;
 				INFOPLIST_FILE = Goodzy/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
