@@ -5,6 +5,9 @@ import { ImageCard, Button } from '../common';
 import { color } from '../../constants/theme';
 import { data } from '../../constants/data';
 
+import Spinner from 'react-native-loading-spinner-overlay';
+import Dialog from "react-native-dialog";
+import axios from 'axios';
 import { ScaledSheet } from 'react-native-size-matters';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -37,7 +40,8 @@ export default class VoucherDetailCmp extends Component {
       isRedeemed:false,
       type:this.props.navigation.getParam('type', null),
       isAddWalletMsg:false,
-      isAddWalletBtn:false
+      isAddWalletBtn:false,
+      data:this.props.navigation.getParam('data'),
     }
   }
 
@@ -50,14 +54,32 @@ export default class VoucherDetailCmp extends Component {
   }
 
   addToWallet= () => {
-    console.log('addtowallet')
-    this.setState({isAddWalletMsg:true, isAddWalletBtn:true});
-    setTimeout(()=> {
-      this.setState({isAddWalletMsg:false})
-    }, 5000)
+    // console.log('addtowallet')
+    this.setState({showSpinner:true});
+    const userData = await AsyncStorage.getItem('userData');
+    let access_token = {
+      headers: {
+        'Authorization': 'Bearer '+JSON.parse(userData).access_token
+      }
+    };
+    axios.post('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.id+'&is_wallet=1', {}, access_token).then(
+      async(res)=> {
+        console.log(res.data);
+        this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
+        setTimeout(()=> {
+          this.setState({isAddWalletMsg:false})
+        }, 5000)
+      }
+    ).catch(
+     async  (error)=> {
+        this.setState({showSpinner: false});
+        console.log('error', error);
+        this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
+      }
+    );
   }
   render(){
-    const { mainContainer, btnContainer } = styles;
+    const { mainContainer, btnContainer, horizontal, spinnerTextStyle } = styles;
 
     return(
       <View style={{flex:1}}>
@@ -73,15 +95,15 @@ export default class VoucherDetailCmp extends Component {
         <ScrollView style={{backgroundColor:color.ligth}}>
           <View style={mainContainer}>
             <ImageCard 
-              logo={data[0].logo} 
-              text={data[0].text}  
-              bigImage={data[0].bigImage}
+              logo={{uri:this.state.data.sponser.logo_url}} 
+              text={this.state.data.title}  
+              bigImage={{uri:this.state.data.banner_image_url}}
               isRedeemed={data[0].isRedeemed}
               onPress={this.gotoDetail}
               isDetail={true}
-              expire={data[0].expire}
-              description={data[0].description}
-              isRedeemed={this.state.isRedeemed}
+              expire={this.state.data.expiration_date}
+              description={this.state.data.description}
+              height={200}
             />
           </View>
         </ScrollView>
@@ -108,8 +130,22 @@ export default class VoucherDetailCmp extends Component {
             />
           }
         </View>
+        <View style={horizontal}>
+          <Spinner 
+            textContent={'Loading...'}
+            animation='fade'
+            textStyle={spinnerTextStyle}
+            visible={this.state.showSpinner}
+          />
+        </View>
+        <Dialog.Container visible={this.state.showAlert} >
+          <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
+          <Dialog.Description>
+            {this.state.errorMsg}
+          </Dialog.Description>
+          <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
+        </Dialog.Container>
       </View>
-      
     )
   }
 }
@@ -137,5 +173,14 @@ const styles = ScaledSheet.create({
     elevation: 5,
     borderTopColor:'#e5e5e5',
     borderTopWidth:2
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
+  },
+  horizontal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
   }
 })

@@ -1,12 +1,15 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Image, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions, ScrollView, AsyncStorage } from 'react-native';
 
 import { color, images } from '../../constants/theme';
 import { FloatingInput } from '../common'
 
+import Spinner from 'react-native-loading-spinner-overlay';
+import Dialog from "react-native-dialog";
+import axios from 'axios';
 import {ScaledSheet, ms} from 'react-native-size-matters';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCamera } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 
 const { height:deviceHeigth, width:deviceWidth } = Dimensions.get('screen');
 
@@ -28,12 +31,11 @@ export default class EditProfileCmp extends Component {
           <Text style={{color:color.blue}}>Done</Text>
         </TouchableOpacity>
       ),
-      headerLeft:(<></>)
-		// };
-		// title: 'Dashboard',
-		// headerTintColor: theme.color.ligth,
-		// headerStyle: {
-		//   backgroundColor: theme.color.primary, flex: 1, textAlign: "center"
+      headerLeft:(
+        <TouchableOpacity activeOpacity={0.5} style={{marginLeft:10}} onPress={()=> navigation.pop()}>
+          <FontAwesomeIcon icon={faChevronLeft} size={20} color={color.dark} />
+        </TouchableOpacity>
+      )
 		}
   };
   
@@ -44,18 +46,93 @@ export default class EditProfileCmp extends Component {
     });
 
     this.state = {
-      name:'Mitchell Williamson',
-      email:'pamela.foster@example.com',
-      phone:'(843) 555-0130'
+      name:'',
+      email:'',
+      phone:'',
+      userData:'',
+      showSpinner:false,
+      showAlert:false,
+      isError:false,
+      errorMsg:''
     }
+    
+    this.getUser();
   }
 
-  popScreen = () => {
-    this.props.navigation.pop();
+  async getUser() {
+    const user = await AsyncStorage.getItem('userData');
+    const parseUser = JSON.parse(user);
+    this.setState({
+      userData: parseUser,
+      name: parseUser.name,
+      email:parseUser.email
+    })
+  }
+
+  handleCancel() {
+    this.setState({showAlert:false});
+  }
+
+  popScreen = async() => {
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+    if(!this.state.name) {
+      this.setState({
+        errorMsg:'Please enter your name.',
+        isError:true
+      });
+      setTimeout(()=> {
+        this.setState({isError:false, errorMsg:''});
+      }, 3000)
+    }
+    else if(!this.state.email) {
+      this.setState({
+        errorMsg:'Please enter your email.',
+        isError:true
+      });
+      setTimeout(()=> {
+        this.setState({isError:false, errorMsg:''});
+      }, 3000)
+    }
+    else if(!reg.test(this.state.email)) {
+      this.setState({
+        errorMsg:'Email address is not correct',
+        isError:true
+      });
+      setTimeout(()=> {
+        this.setState({isError:false, errorMsg:''});
+      }, 3000)
+    }
+    else {
+      // const userData = await AsyncStorage.getItem('userData');
+      const access_token = {
+        headers: { 
+          'Authorization': 'Bearer '.concat(this.state.userData.access_token) 
+        }
+      };
+      const url = 'https://kanztainer.com/goodyz/api/v1/users/'+this.state.userData.id;
+      const bodyParameters = {name: this.state.name, email: this.state.email};
+
+      this.setState({showSpinner:true});
+
+      axios.put(url, bodyParameters, access_token).then((res)=> {
+        this.setState({showSpinner:false});
+        console.log(res.data);
+        // this.setState({showAlert:true, errorMsg:'Password changed successfuly.', errorTitle:'Success'});
+        setTimeout(()=> {
+          this.props.navigation.pop();
+        }, 2000)
+      }).catch((error)=> {
+        this.setState({showSpinner:false});
+        console.log('error', error);
+        this.setState({showAlert:true, errorMsg:'Something went wrong. '+error, errorTitle:'Error!!'});
+      });
+    }
+    // this.props.navigation.pop();
   };
 
   render(){
-    const { mainContainer, profilePicture, } = styles;
+    const { mainContainer, profilePicture, spinnerTextStyle, horizontal } = styles;
 
     return(
       <ScrollView>
@@ -89,7 +166,7 @@ export default class EditProfileCmp extends Component {
                 this.setState({ email: text });
               }}
             />
-            <FloatingInput
+            {/* <FloatingInput
               margin={ms(10)}
               width={'95%'} 
               label={'Phone'} 
@@ -99,9 +176,31 @@ export default class EditProfileCmp extends Component {
               onChangeText={text => {
                   this.setState({ phone: text });
               }}
-            />
+            /> */}
+            {
+              this.state.isError?
+              <View style={{marginTop:20}}>
+                <Text style={{textAlign:'justify', justifyContent:'center', color:'red'}}>{this.state.errorMsg}</Text>
+              </View>
+              : null
+            }
           </View>
         </View>
+        <View style={horizontal}>
+          <Spinner 
+            textContent={'Loading...'}
+            animation='fade'
+            textStyle={spinnerTextStyle}
+            visible={this.state.showSpinner}
+          />
+        </View>
+        <Dialog.Container visible={this.state.showAlert} >
+          <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
+          <Dialog.Description>
+            {this.state.errorMsg}
+          </Dialog.Description>
+          <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
+        </Dialog.Container>
       </ScrollView>
     )
   }
@@ -121,5 +220,14 @@ const styles = ScaledSheet.create({
     width:100,
     marginTop:30,
     borderRadius:50
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
+  },
+  horizontal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
   }
 })
