@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
-import { View, Text, AsyncStorage } from 'react-native';
+import { View, Text, AsyncStorage, ScrollView, FlatList } from 'react-native';
 
-import { ImageCard, Button } from '../common';
+import { ImageCard } from '../common';
 import { color } from '../../constants/theme';
-import { data } from '../../constants/data';
 
 import { ScaledSheet } from 'react-native-size-matters';
-import { ScrollView } from 'react-native-gesture-handler';
-// import AsyncStorage from '@react-native-community/async-storage';
+
+import {data} from '../../constants/data'
 
 export default class WalletCmp extends Component {
 
@@ -27,6 +26,9 @@ export default class WalletCmp extends Component {
 
   constructor(props){
     super(props);
+    this.state = {
+      wallet:''
+    }
   }
 
   async componentDidMount() {
@@ -36,7 +38,12 @@ export default class WalletCmp extends Component {
         this.props.navigation.pop();
         this.props.navigation.navigate('Signin');
       }
-      console.log(isUserLogedIn);
+      else {
+        const user = await AsyncStorage.getItem('userData');
+        const wallet = JSON.parse(user).wallet;
+        this.setState({wallet: wallet});
+        console.log(wallet);
+      }
     });
   }
 
@@ -52,7 +59,6 @@ export default class WalletCmp extends Component {
   checkUserLoggedIn = async () => {
     try {
       const value = await AsyncStorage.getItem('isUserLogedIn')
-      console.log('wallet', value);
       if(value == null || value == false)
         return false;
       else
@@ -63,25 +69,40 @@ export default class WalletCmp extends Component {
     }
   }
 
-  gotoDetail = () => {
-    this.props.navigation.navigate('VoucherDetailCmp')
+  gotoDetail(data){
+    this.props.navigation.navigate('VoucherDetailCmp', {data:data})
+  }
+
+  renderData = (item, index) => {
+    const {mainContainer} = styles;
+    return(
+      item.item.is_wallet == 1 ?
+        <View style={mainContainer}>
+          <ImageCard 
+            logo={{uri:item.item.offer.sponser.logo_url}} 
+            text={item.item.offer.title}  
+            bigImage={{uri:item.item.offer.banner_image_url}}
+            isRedeemed={data[0].isRedeemed}
+            onPress={()=> this.gotoDetail(item.item.offer)}
+            height={200}
+          />
+        </View>
+      :
+        null
+    )
   }
 
   render(){
-    const { mainContainer } = styles;
-
     return(
-      <ScrollView style={{backgroundColor:color.ligth}}>
-        <View style={mainContainer}>
-          <ImageCard 
-            logo={data[0].logo} 
-            text={data[0].text}  
-            bigImage={data[0].bigImage}
-            isRedeemed={data[0].isRedeemed}
-            onPress={this.gotoDetail}
-          />
-        </View>
-      </ScrollView>
+      <View style={{backgroundColor:color.ligth}}>
+        <FlatList
+          pagingEnabled={false}            
+          showsVerticalScrollIndicator={false}
+          data={this.state.wallet}
+          renderItem={this.renderData}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </View>
     )
   }
 }
@@ -89,6 +110,6 @@ export default class WalletCmp extends Component {
 const styles = ScaledSheet.create({
   mainContainer:{
     backgroundColor:color.ligth,
-    marginBottom:60
+    marginBottom:0
   }
 })
