@@ -30,9 +30,9 @@ export default class QrCodeCmp extends Component {
   
   componentDidMount() {
     axios.defaults.headers.post['Content-Type'] = 'application/json';
-    setTimeout(()=> {
-      this.onSuccess({data:16})
-    }, 2000)
+    // setTimeout(()=> {
+    //   this.onSuccess({data:16})
+    // }, 2000)
   }
 
   handleCancel() {
@@ -65,22 +65,34 @@ export default class QrCodeCmp extends Component {
   };
 
   render(){
-    const { mainContainer, qrContainer, horizontal, spinnerTextStyle } = styles;
+    const { mainContainer, qrContainer, horizontal, spinnerTextStyle, marker } = styles;
 
     return(
       <View>
-        <ImageBackground style={mainContainer} source={images.background} resizeMode={'cover'}>
-          <Text style={{marginTop:100, fontSize:22, fontWeight:'bold'}}>Scan QR</Text>
+        {/* <ImageBackground style={mainContainer} source={images.background} resizeMode={'cover'}> */}
+          <Text style=
+            {{
+              top:50, 
+              fontSize:22, 
+              fontWeight:'bold', 
+              position:'absolute', 
+              zIndex:9, 
+              width: deviceWidth, 
+              textAlign:"center",
+            }}
+          >
+            Scan QR
+          </Text>
           <QRCodeScanner
             onRead={this.onSuccess}
             // flashMode={RNCamera.Constants.FlashMode.torch}
             containerStyle={qrContainer}
             cameraStyle={qrContainer}
             showMarker={true}
-            markerStyle={qrContainer}
+            markerStyle={marker}
             ref={(node) => { this.scanner = node }}
           />
-        </ImageBackground>
+        {/* </ImageBackground> */}
         <View style={horizontal}>
           <Spinner 
             textContent={'Loading...'}
@@ -109,8 +121,12 @@ const styles = StyleSheet.create({
     height: deviceHeigth
   },
   qrContainer: {
-    height:200,
-    width:200,
+    height: deviceHeigth,
+    width: deviceWidth,
+  },
+  marker: {
+    height: 300,
+    width: 300,
   },
   spinnerTextStyle: {
     color: '#FFF'

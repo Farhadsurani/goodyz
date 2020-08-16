@@ -47,12 +47,42 @@ export default class VoucherDetailCmp extends Component {
     }
   }
 
+  componentDidMount(){
+    // console.log('``````Data```````')
+    // console.log(this.state.data)
+  }
+
   gotoDetail = () => {
     console.log('gotoDetails')
   }
 
-  redeem = () => {
-    this.setState({isRedeemed:!this.state.isRedeemed})
+  redeem = async() => {
+    if(!this.state.isRedeemed){
+      this.setState({showSpinner:true});
+      const user_access_token = await AsyncStorage.getItem('access_token');
+      let access_token = {
+        headers: {
+          'Authorization': 'Bearer '.concat(user_access_token)
+        }
+      };
+      console.log(access_token, this.state.data.id);
+      axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.id+'&is_redeemed=1', access_token).then(
+        async(res)=> {
+          console.log(res.data);
+          this.setState({isRedeemed:!this.state.isRedeemed, showSpinner:false})
+          this.refreshUser(access_token);
+        }
+      ).catch(
+        async(error)=> {
+          this.setState({showSpinner: false});
+          console.log('error', error);
+          this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
+        }
+      );
+    }
+    else {
+      console.log('else')
+    }
   }
 
   handleCancel() {
@@ -73,12 +103,13 @@ export default class VoucherDetailCmp extends Component {
         async(res)=> {
           console.log(res.data);
           this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
+          this.refreshUser(access_token);
           setTimeout(()=> {
             this.setState({isAddWalletMsg:false})
           }, 5000)
         }
       ).catch(
-      async  (error)=> {
+        async(error)=> {
           this.setState({showSpinner: false});
           console.log('error', error);
           this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
@@ -90,6 +121,24 @@ export default class VoucherDetailCmp extends Component {
       this.props.navigation.navigate('WalletCmp')
     }
   }
+
+  async refreshUser(header) {
+    // console.log('refreshUser');
+    // const access_token = await AsyncStorage.getItem('access_token');
+    // const header = {
+    //   headers: {
+    //     'Authorization': 'Bearer '.concat(access_token)
+    //   }
+    // }
+    const url = 'https://kanztainer.com/goodyz/api/v1/me'
+    axios.post(url, header).then(async(res)=> {
+      console.log(res.data.data);
+      await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
+    }).catch((error)=> {
+      console.log('error', error);
+    });
+  }
+
   render(){
     const { mainContainer, btnContainer, horizontal, spinnerTextStyle } = styles;
 
@@ -110,7 +159,8 @@ export default class VoucherDetailCmp extends Component {
               logo={{uri:this.state.data.sponser.logo_url}} 
               text={this.state.data.title}  
               bigImage={{uri:this.state.data.banner_image_url}}
-              isRedeemed={data[0].isRedeemed}
+              isRedeemed={this.state.isRedeemed}
+              qrCode={{uri:this.state.data.qrcode_url}}
               onPress={this.gotoDetail}
               isDetail={true}
               expire={this.state.data.expiration_date}
