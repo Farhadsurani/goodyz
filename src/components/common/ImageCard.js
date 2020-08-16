@@ -46,7 +46,7 @@ const ImageCard = ({logo, text, bigImage, isRedeemed = false, onPress, isDetail 
         null
       }
       </View>
-      </TouchableOpacity>
+    </TouchableOpacity>
   );
 }
 

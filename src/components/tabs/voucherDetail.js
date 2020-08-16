@@ -159,7 +159,8 @@ export default class VoucherDetailCmp extends Component {
               logo={{uri:this.state.data.sponser.logo_url}} 
               text={this.state.data.title}  
               bigImage={{uri:this.state.data.banner_image_url}}
-              isRedeemed={data[0].isRedeemed}
+              isRedeemed={this.state.isRedeemed}
+              qrCode={{uri:this.state.data.qrcode_url}}
               onPress={this.gotoDetail}
               isDetail={true}
               expire={this.state.data.expiration_date}
