@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Image, Dimensions, AsyncStorage } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions, AsyncStorage, SafeAreaView } from 'react-native';
 
 import { color, images } from '../../constants/theme';
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, ScrollView, Text, Dimensions, AsyncStorage, TouchableOpacity } from "react-native";
+import { View, Image, ScrollView, Text, Dimensions, AsyncStorage, TouchableOpacity, SafeAreaView } from "react-native";
 
 import { images, color } from '../../constants/theme';
 import { FloatingInput, Button } from '../common';
@@ -104,88 +104,90 @@ export default class Signin extends Component {
     const { mainContainer, imageContainer, formContainer, horizontal, spinnerTextStyle } = styles;
 
     return(
-      <ScrollView>
-        <View style={{position:'absolute', left:10, top:10, zIndex:9}}>
-          <TouchableOpacity activeOpacity={0.5} onPress={this.back}>
-            <FontAwesomeIcon icon={faArrowLeft} size={22} color={color.orange} />
-          </TouchableOpacity>
-        </View>
-        <View style={mainContainer}>
-          <View style={imageContainer}>
-            <Image source={images.logo} resizeMode={'contain'} style={{width:100, height:100}}/>
-          </View>
-          
-          <Text style={{marginTop:10, fontSize:ms(30), fontWeight:'bold'}}>Login</Text>
-
-          <View style={formContainer}>
-            <FloatingInput
-              margin={ms(9)}
-              width={ms(250)} 
-              keyboardType={'email-address'}
-              label={'Email'} 
-              value={this.state.email}
-              ref={ref => this.eremail = ref}
-              onChangeText={text => {
-                  this.setState({ email: text });
-              }}
-            />
-            <FloatingInput
-              margin={ms(10)}
-              width={ms(250)} 
-              label={'Password'} 
-              secureTextEntry
-              value={this.state.password}
-              ref={ref => this.erPassword = ref}
-              onChangeText={text => {
-                  this.setState({ password: text });
-              }}
-            />
-          </View>
-          
-          <View style={{marginTop:20}} ref={ref => this.error = ref}>
-            <Text style={{textAlign: 'justify',justifyContent: 'center',color: 'red',}}>{this.state.error}</Text>
-          </View>
-          
-          <View>
-            <Button btnName={'Login'} btnColor={color.orange}  onPress={this.login}/>
-          </View>
-
-          <View style={{marginTop:10, flexDirection:'row', width:ms(250)}}>
-            <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-start', width:ms(140)}} onPress={this.signup}>
-              <Text style={{color:color.orange}}>Signup</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-end', width:ms(140)}}>
-              <Text style={{color:color.orange}}>Forgot Password?</Text>
+      <SafeAreaView>
+        <ScrollView>
+          <View style={{position:'absolute', left:10, top:10, zIndex:9}}>
+            <TouchableOpacity activeOpacity={0.5} onPress={this.back}>
+              <FontAwesomeIcon icon={faArrowLeft} size={22} color={color.orange} />
             </TouchableOpacity>
           </View>
-        </View>
+          <View style={mainContainer}>
+            <View style={imageContainer}>
+              <Image source={images.logo} resizeMode={'contain'} style={{width:100, height:100}}/>
+            </View>
+            
+            <Text style={{marginTop:10, fontSize:ms(30), fontWeight:'bold'}}>Login</Text>
 
-        <Toast   
-          ref="toast"    
-          style={{backgroundColor:'#DCDCDC',width:'80%'}}
-          position='bottom'
-          positionValue={100}
-          fadeInDuration={750}
-          fadeOutDuration={2000}
-          opacity={0.8}
-          textStyle={{color:'#000',textAlign:'center', fontFamily:'JosefinSans-Regular'}}
-        />
-         <View style={horizontal}>
-          <Spinner 
-            textContent={'Loading...'}
-            animation='fade'
-            textStyle={spinnerTextStyle}
-            visible={this.state.showSpinner}
+            <View style={formContainer}>
+              <FloatingInput
+                margin={ms(9)}
+                width={ms(250)} 
+                keyboardType={'email-address'}
+                label={'Email'} 
+                value={this.state.email}
+                ref={ref => this.eremail = ref}
+                onChangeText={text => {
+                    this.setState({ email: text });
+                }}
+              />
+              <FloatingInput
+                margin={ms(10)}
+                width={ms(250)} 
+                label={'Password'} 
+                secureTextEntry
+                value={this.state.password}
+                ref={ref => this.erPassword = ref}
+                onChangeText={text => {
+                    this.setState({ password: text });
+                }}
+              />
+            </View>
+            
+            <View style={{marginTop:20}} ref={ref => this.error = ref}>
+              <Text style={{textAlign: 'justify',justifyContent: 'center',color: 'red',}}>{this.state.error}</Text>
+            </View>
+            
+            <View>
+              <Button btnName={'Login'} btnColor={color.orange}  onPress={this.login}/>
+            </View>
+
+            <View style={{marginTop:10, flexDirection:'row', width:ms(250)}}>
+              <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-start', width:ms(140)}} onPress={this.signup}>
+                <Text style={{color:color.orange}}>Signup</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-end', width:ms(140)}}>
+                <Text style={{color:color.orange}}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <Toast   
+            ref="toast"    
+            style={{backgroundColor:'#DCDCDC',width:'80%'}}
+            position='bottom'
+            positionValue={100}
+            fadeInDuration={750}
+            fadeOutDuration={2000}
+            opacity={0.8}
+            textStyle={{color:'#000',textAlign:'center', fontFamily:'JosefinSans-Regular'}}
           />
-        </View>
-        <Dialog.Container visible={this.state.showAlert} >
-          <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
-          <Dialog.Description>
-            {this.state.errorMsg}
-          </Dialog.Description>
-          <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
-        </Dialog.Container>
-      </ScrollView>
+          <View style={horizontal}>
+            <Spinner 
+              textContent={'Loading...'}
+              animation='fade'
+              textStyle={spinnerTextStyle}
+              visible={this.state.showSpinner}
+            />
+          </View>
+          <Dialog.Container visible={this.state.showAlert} >
+            <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
+            <Dialog.Description>
+              {this.state.errorMsg}
+            </Dialog.Description>
+            <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
+          </Dialog.Container>
+        </ScrollView>
+      </SafeAreaView>
     )
   }
 }
