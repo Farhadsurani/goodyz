@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { View, ScrollView, Text, Dimensions } from "react-native";
-
-import { color } from '../../constants/theme';
-
-import {ScaledSheet} from 'react-native-size-matters';
+import { View, ScrollView, Text, Dimensions, AsyncStorage } from "react-native";
 
 import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 
+import { color } from '../../constants/theme';
+
+import Spinner from 'react-native-loading-spinner-overlay';
+import Dialog from "react-native-dialog";
+import axios from 'axios';
+
+import {ScaledSheet} from 'react-native-size-matters';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
@@ -43,6 +46,40 @@ export default class AnalyticsCmp extends Component {
 
   constructor(props) {
     super(props);
+    this.state= {
+      data:'',
+      showSpinner:false,
+      showAlert:false,
+      errorMsg:'',
+      errorTitle:'',
+    }
+  }
+
+  async componentDidMount() {
+    this.setState({showSpinner:true});
+    const date = new Date();
+    const today = date.getFullYear()+'-'+date.getMonth()+'-'+date.getDate();
+    console.log(today);
+
+    const access_token = await AsyncStorage.getItem('access_token');
+    const headers = {
+      headers: {
+        'Authorization': 'Bearer '.concat(access_token)
+      }
+    }
+
+    axios.get('https://kanztainer.com/goodyz/api/v1/sponser/offers-stats?date='+today, headers).then(
+      async (res)=> {
+        this.setState({showSpinner:false});
+        console.log(res.data.data);
+        this.setState({data: res.data.data});
+      }).catch(
+        (error)=> {
+          this.setState({showSpinner:false});
+          console.log('error', error);
+          this.setState({showAlert:true, errorMsg: error+' Try logout and login again.', errorTitle:'Error!!'});
+        }
+      );
   }
 
   trimText(string) {
@@ -57,9 +94,9 @@ export default class AnalyticsCmp extends Component {
    return(
       <TouchableOpacity activeOpacity={0.5} onPress={()=>this.gotoSingle(item.item)}>
         <View style={mainContainerList}>
-          <Text style={headingList}>{this.trimText(item.item.discount)}</Text>
+          <Text style={headingList}>{this.trimText(item.item.title)}</Text>
           <View style={{flexDirection:'column', alignItems:'flex-end'}}>
-            <Text style={{color:color.green, fontSize:26, fontWeight:'bold'}}>{item.item.redeemed}</Text>
+            <Text style={{color:color.green, fontSize:26, fontWeight:'bold'}}>{item.item.redeemed_count}</Text>
             <Text style={{color:color.darkGrey, fontSize:12}}>REDEEMED</Text>
           </View>
           <View>
@@ -75,18 +112,22 @@ export default class AnalyticsCmp extends Component {
   }
 
   gotoSingle(params){
-    const tmp = data.find(e=> e.discount === params.discount);
+    const tmp = data.find(e=> e.id === params.id);
     this.props.navigation.navigate('SingleVoucherReportCmp', {data:tmp});
   }
 
+  handleCancel() {
+    this.setState({showAlert:false});
+  }
+  
   render(){
-    const {mainContainer, mainCard, mainCardText, heading} = styles;
+    const {mainContainer, mainCard, mainCardText, heading, spinnerTextStyle, horizontal} = styles;
     return(
       <View style={mainContainer}>
         <ScrollView>
           <TouchableOpacity activeOpacity={0.5} onPress={this.gotoTotal}>
             <View style={mainCard}>
-              <Text style={[mainCardText, {fontSize:24}]}>145</Text>
+              <Text style={[mainCardText, {fontSize:24}]}>{this.state.data.total_redeemed_count}</Text>
               <Text style={[mainCardText, {fontSize:16}]}>Total Voucher Redeemed</Text>
             </View>
           </TouchableOpacity>
@@ -96,11 +137,26 @@ export default class AnalyticsCmp extends Component {
           <FlatList
             pagingEnabled={false}            
             showsVerticalScrollIndicator={false}
-            data={data}
+            data={this.state.data.offers}
             renderItem={this.renderData}
             keyExtractor={(item, index) => index.toString()}
           />
         </ScrollView>
+        <View style={horizontal}>
+          <Spinner 
+            textContent={'Loading...'}
+            animation='fade'
+            textStyle={spinnerTextStyle}
+            visible={this.state.showSpinner}
+          />
+        </View>
+        <Dialog.Container visible={this.state.showAlert} >
+          <Dialog.Title>{this.state.errorTitle}</Dialog.Title>
+          <Dialog.Description>
+            {this.state.errorMsg}
+          </Dialog.Description>
+          <Dialog.Button color="#58c4b7" bold label="Okay" onPress={this.handleCancel.bind(this)} />
+        </Dialog.Container>
       </View>
     );
   }
@@ -145,5 +201,14 @@ const styles = ScaledSheet.create({
     width:'65%', 
     textAlignVertical:'center',
     fontSize:16
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
+  },
+  horizontal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
   }
 })

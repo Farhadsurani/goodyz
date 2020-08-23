@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Text, StyleSheet, TouchableOpacity, View, Dimensions, ImageBackground, AsyncStorage } from 'react-native';
+import { Text, StyleSheet, View, Dimensions, AsyncStorage } from 'react-native';
 
 import axios from 'axios';
 
@@ -8,7 +8,6 @@ import { color, images } from '../../constants/theme';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Dialog from "react-native-dialog";
-// import { RNCamera } from 'react-native-camera';
 
 const { height:deviceHeigth, width:deviceWidth } = Dimensions.get('screen');
 
@@ -28,11 +27,13 @@ export default class QrCodeCmp extends Component {
     }
   }
   
-  componentDidMount() {
+  async componentDidMount() {
     axios.defaults.headers.post['Content-Type'] = 'application/json';
-    // setTimeout(()=> {
-    //   this.onSuccess({data:16})
-    // }, 2000)
+    // const userType = await AsyncStorage.getItem('userType');
+    // if(userType == 'user')
+      // setTimeout(()=> {
+      //   this.onSuccess({data:16})
+      // }, 2000)
   }
 
   handleCancel() {
@@ -45,21 +46,23 @@ export default class QrCodeCmp extends Component {
     if(userData == null)
       return;
 
-    setTimeout(()=> {
-      this.scanner.reactivate()
-    }, 30000);
+    // setTimeout(()=> {
+    //   this.scanner.reactivate()
+    // }, 30000);
     const access_token = await AsyncStorage.getItem('access_token');
     
     this.setState({showSpinner:true});
     axios.defaults.headers.common['Authorization'] = 'Bearer '+access_token;
     axios.get('https://kanztainer.com/goodyz/api/v1/events/'+e.data).then((res)=> {
       this.setState({showSpinner:false});
+      this.scanner.reactivate();
       // console.log(res.data);
       // console.log(res.data.data.offers);
       this.props.navigation.navigate('QrDetailCmp', {data: res.data});
     }).catch((error)=> {
       this.setState({showSpinner:false});
       console.log('error', error);
+      this.scanner.reactivate();
       this.setState({showAlert:true, errorMsg:'Something went wrong. '+error, errorTitle:'Error!!'});
     });
   };

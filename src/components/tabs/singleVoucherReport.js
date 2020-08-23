@@ -87,11 +87,11 @@ export default class SingleVoucherReportCmp extends Component {
       <View style={mainContainer}>
         <ScrollView>
           <View style={{width:deviceWidth-50, marginTop:10}}>
-            <Text style={{fontSize:18, color:color.darkGrey}}>{this.state.data.discount}</Text>
+            <Text style={{fontSize:18, color:color.darkGrey}}>{this.state.data.title}</Text>
           </View>
           
           <View style={mainCard}>
-            <Text style={[mainCardText, {fontSize:24}]}>{this.state.data.redeemed}</Text>
+            <Text style={[mainCardText, {fontSize:24}]}>{this.state.data.redeemed_count}</Text>
             <Text style={[mainCardText, {fontSize:16}]}>Total Voucher Redeemed</Text>
           </View>
           
