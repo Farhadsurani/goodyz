@@ -29,11 +29,11 @@ export default class QrCodeCmp extends Component {
   
   async componentDidMount() {
     axios.defaults.headers.post['Content-Type'] = 'application/json';
-    // const userType = await AsyncStorage.getItem('userType');
-    // if(userType == 'user')
-      // setTimeout(()=> {
-      //   this.onSuccess({data:16})
-      // }, 2000)
+    const userType = await AsyncStorage.getItem('userType');
+    if(userType == 'user')
+      setTimeout(()=> {
+        this.onSuccess({data:16})
+      }, 2000)
   }
 
   handleCancel() {

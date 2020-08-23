@@ -59,6 +59,7 @@ export default class SingleVoucherReportCmp extends Component {
     this.state = {
       data:this.props.navigation.getParam('data')
     }
+    // console.log(this.state.data);
   }
 
   trimText(string) {

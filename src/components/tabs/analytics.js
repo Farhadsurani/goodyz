@@ -112,7 +112,7 @@ export default class AnalyticsCmp extends Component {
   }
 
   gotoSingle(params){
-    const tmp = data.find(e=> e.id === params.id);
+    const tmp = this.state.data.offers.find(e=> e.id === params.id);
     this.props.navigation.navigate('SingleVoucherReportCmp', {data:tmp});
   }
 
