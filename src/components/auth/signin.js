@@ -21,6 +21,8 @@ export default class Signin extends Component {
   constructor(props){
     super(props);
     this.state = {
+      // email:'axe@goodyz.com',
+      // password:'farhad123',
       email:'admin@boilerplate.com',
       password:'admin123',
       device_type:'android',
@@ -65,7 +67,15 @@ export default class Signin extends Component {
             const userState = await AsyncStorage.setItem('isUserLogedIn', 'true');
             const userData = await AsyncStorage.setItem('userData', JSON.stringify(res.data.data.user));
             const access_token = await AsyncStorage.setItem('access_token',res.data.data.user.access_token);
-            this.props.navigation.navigate('Tabs')
+            console.log('role id: ', res.data.data.user.roles[0].id)
+            if(res.data.data.user.roles[0].id == 4) {
+              await AsyncStorage.setItem('userType', 'sponser');
+              this.props.navigation.navigate('TabsShop')
+            }
+            else {
+              await AsyncStorage.setItem('userType', 'user');
+              this.props.navigation.navigate('Tabs')  
+            }
             // if(this.state.email == 'user')
             //   this.props.navigation.navigate('Tabs')
             // else

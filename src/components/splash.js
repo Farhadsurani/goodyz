@@ -21,7 +21,7 @@ class Splash extends React.Component {
   async navigate() {
     const stack = await AsyncStorage.getItem('userType');
     setTimeout(()=> {
-      if(stack == 'shop')
+      if(stack == 'sponser')
         this.props.navigation.navigate('TabsShop')
       else
         this.props.navigation.navigate('Tabs')
