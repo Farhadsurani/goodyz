@@ -94,7 +94,7 @@ export default class ProfileCmp extends Component {
         this.props.navigation.navigate('QrCode');
       }
     ).catch(
-     async  (error)=> {
+     async (error)=> {
         this.setState({showSpinner: false});
         console.log('error', error);
         await AsyncStorage.removeItem('isUserLogedIn');

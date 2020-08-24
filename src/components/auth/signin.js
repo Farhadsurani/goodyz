@@ -23,8 +23,10 @@ export default class Signin extends Component {
     this.state = {
       // email:'axe@goodyz.com',
       // password:'farhad123',
-      email:'admin@boilerplate.com',
-      password:'admin123',
+      // email:'admin@boilerplate.com',
+      // password:'admin123',
+      email:'',
+      password:'',
       device_type:'android',
       device_token:'123',
       refs: undefined,

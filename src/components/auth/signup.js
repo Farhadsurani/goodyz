@@ -34,11 +34,11 @@ export default class Signup extends Component {
   constructor(props){
     super(props);
     this.state = {
-      name:'Mudassir',
+      name:'',
       image:'',
-      email:'mudassir@gmail.com',
-      password:'123456',
-      password_confirmation:'123456',
+      email:'',
+      password:'',
+      password_confirmation:'',
       device_token:'123456',
       device_type:'android',
       isError:false,

@@ -38,7 +38,7 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>To use QrCode Scanner</string>
+	<string>To take picture for profile photo and stories</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>To locate you</string>
 	<key>UILaunchStoryboardName</key>
@@ -57,7 +57,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSCameraUsageDescription</key>
-	<string>To take picture for profile photo and stories</string>
 </dict>
 </plist>
