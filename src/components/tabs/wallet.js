@@ -82,8 +82,8 @@ export default class WalletCmp extends Component {
             logo={{uri:item.item.offer.sponser.logo_url}} 
             text={item.item.offer.title}  
             bigImage={{uri:item.item.offer.banner_image_url}}
-            isRedeemed={data[0].isRedeemed}
-            onPress={()=> this.gotoDetail(item.item.offer)}
+            isRedeemed={item.item.is_redeemed}
+            onPress={()=> this.gotoDetail(item.item)}
             height={200}
           />
         </View>

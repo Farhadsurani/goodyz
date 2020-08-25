@@ -9,7 +9,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
 
 // Make a component
-const ImageCard = ({logo, text, bigImage, isRedeemed = false, onPress, isDetail = false, expire, description, height}) => {
+const ImageCard = ({logo, text, bigImage, isRedeemed = 0, onPress, isDetail = false, expire, description, height}) => {
   const {mainContainer, imageContainer, image, shortTag, saleImage} = styles;
 
   return (
@@ -33,7 +33,7 @@ const ImageCard = ({logo, text, bigImage, isRedeemed = false, onPress, isDetail 
             <Text style={{fontSize:16, color:color.darkGrey, marginRight:15}}>{expire}</Text>
           </View>
           {
-            isRedeemed?
+            isRedeemed == 1?
             <View style={{width:Dimensions.get('screen').width, alignItems:'center'}}>
               <Image source={images.qrCode} resizeMode={'contain'} style={{height:200, width:200}}/>
             </View>

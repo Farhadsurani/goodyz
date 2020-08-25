@@ -72,11 +72,13 @@ export default class Signin extends Component {
             console.log('role id: ', res.data.data.user.roles[0].id)
             if(res.data.data.user.roles[0].id == 4) {
               await AsyncStorage.setItem('userType', 'sponser');
-              this.props.navigation.navigate('TabsShop')
+              this.props.navigation.navigate('TabsShop');
             }
             else {
               await AsyncStorage.setItem('userType', 'user');
-              this.props.navigation.navigate('Tabs')  
+              this.props.navigation.navigate('Tabs').then(()=> {
+                this.props.navigation.navigate('QrCode');
+              })
             }
             // if(this.state.email == 'user')
             //   this.props.navigation.navigate('Tabs')
@@ -102,6 +104,10 @@ export default class Signin extends Component {
 
   signup = () => {
     this.props.navigation.navigate('Signup');
+  }
+
+  forget = () => {
+    this.props.navigation.navigate('Forgot');
   }
 
   back = () => {
@@ -167,7 +173,7 @@ export default class Signin extends Component {
               <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-start', width:ms(140)}} onPress={this.signup}>
                 <Text style={{color:color.orange}}>Signup</Text>
               </TouchableOpacity>
-              <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-end', width:ms(140)}}>
+              <TouchableOpacity activeOpacity={0.5} style={{alignSelf:'flex-end', width:ms(140)}} onPress={this.forget}>
                 <Text style={{color:color.orange}}>Forgot Password?</Text>
               </TouchableOpacity>
             </View>

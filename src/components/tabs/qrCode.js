@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import { Text, StyleSheet, View, Dimensions, AsyncStorage } from 'react-native';
+import { NavigationEvents, NavigationScreenProps } from 'react-navigation';
 
 import axios from 'axios';
 
@@ -24,11 +25,12 @@ export default class QrCodeCmp extends Component {
     this.state = {
       showSpinner:false,
       showAlert:false,
+      isFocused:false
     }
   }
   
   async componentDidMount() {
-    axios.defaults.headers.post['Content-Type'] = 'application/json';
+    // axios.defaults.headers.post['Content-Type'] = 'application/json';
     // const userType = await AsyncStorage.getItem('userType');
     // if(userType == 'user')
     //   setTimeout(()=> {
@@ -40,30 +42,38 @@ export default class QrCodeCmp extends Component {
     this.setState({showAlert:false});
   }
 
-  onSuccess = async e => {
-    console.log(e.data)
-    // const userData = await AsyncStorage.getItem('userData');
-    // if(userData == null)
-    //   return;
+  onDidFocus = payload => {
+    this.setState({ isFocused: true });
+  };
+  
+  onDidBlur = payload => {
+    this.setState({ isFocused: false });
+  };
 
-    // setTimeout(()=> {
-    //   this.scanner.reactivate()
-    // }, 30000);
-    const access_token = await AsyncStorage.getItem('access_token');
+  onSuccess = async e => {
+    console.log('onSuccess');
+    const parseQrData = JSON.parse(e.data);
+    console.log(parseQrData.type, parseQrData.id)
     
     this.setState({showSpinner:true});
-    axios.defaults.headers.common['Authorization'] = 'Bearer '+access_token;
-    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+e.data).then((res)=> {
+    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+parseQrData.id).then((res)=> {
       this.setState({showSpinner:false});
-      this.scanner.reactivate();
-      // console.log(res.data);
-      // console.log(res.data.data.offers);
-      this.props.navigation.navigate('QrDetailCmp', {data: res.data});
+      // setTimeout(()=> {
+      //   this.scanner.reactivate();
+      // }, 3000)
+      console.log(res.data);
+      if(parseQrData.type == 'offer')
+        this.props.navigation.navigate('QrDetailCmp', {data: res.data});
+      else
+        this.props.navigation.navigate('AnalyticsCmp');
+
     }).catch((error)=> {
       this.setState({showSpinner:false});
       console.log('error', error);
-      this.scanner.reactivate();
       this.setState({showAlert:true, errorMsg:'Something went wrong. '+error, errorTitle:'Error!!'});
+      // setTimeout(()=> {
+      //   this.scanner.reactivate();
+      // }, 3000)
     });
   };
 
@@ -73,6 +83,10 @@ export default class QrCodeCmp extends Component {
     return(
       <View>
         {/* <ImageBackground style={mainContainer} source={images.background} resizeMode={'cover'}> */}
+          <NavigationEvents
+            onDidFocus={this.onDidFocus}
+            onDidBlur={this.onDidBlur}
+          />
           <Text style=
             {{
               top:50, 
@@ -86,6 +100,7 @@ export default class QrCodeCmp extends Component {
           >
             Scan QR
           </Text>
+          {this.state.isFocused && (
           <QRCodeScanner
             onRead={this.onSuccess}
             // flashMode={RNCamera.Constants.FlashMode.torch}
@@ -95,6 +110,7 @@ export default class QrCodeCmp extends Component {
             markerStyle={marker}
             ref={(node) => { this.scanner = node }}
           />
+          )}
         {/* </ImageBackground> */}
         <View style={horizontal}>
           <Spinner 

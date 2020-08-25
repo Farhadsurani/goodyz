@@ -38,7 +38,7 @@ export default class VoucherDetailCmp extends Component {
     super(props);
     this.state = {
       isRedeemed:false,
-      type:this.props.navigation.getParam('type', null),
+      type:this.props.navigation.getParam('type'),
       isAddWalletMsg:false,
       isAddWalletBtn:false,
       data:this.props.navigation.getParam('data'),
@@ -48,8 +48,11 @@ export default class VoucherDetailCmp extends Component {
   }
 
   componentDidMount(){
-    // console.log('``````Data```````')
-    // console.log(this.state.data)
+    console.log('is_redeemed: ', this.state.data.is_redeemed)
+    if(this.state.data.is_redeemed == 1)
+      this.setState({isRedeemed: true});
+
+    console.log('type: ', this.state.type)
   }
 
   gotoDetail = () => {
@@ -65,8 +68,7 @@ export default class VoucherDetailCmp extends Component {
           'Authorization': 'Bearer '.concat(user_access_token)
         }
       };
-      console.log(access_token, this.state.data.id);
-      axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.id+'&is_redeemed=1', access_token).then(
+      axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.offer_id+'&is_redeemed=1', access_token).then(
         async(res)=> {
           console.log(res.data);
           this.setState({isRedeemed:!this.state.isRedeemed, showSpinner:false})
@@ -103,7 +105,7 @@ export default class VoucherDetailCmp extends Component {
         async(res)=> {
           console.log(res.data);
           this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
-          this.refreshUser(access_token);
+          this.refreshUser();
           setTimeout(()=> {
             this.setState({isAddWalletMsg:false})
           }, 5000)
@@ -122,16 +124,16 @@ export default class VoucherDetailCmp extends Component {
     }
   }
 
-  async refreshUser(header) {
-    // console.log('refreshUser');
-    // const access_token = await AsyncStorage.getItem('access_token');
-    // const header = {
-    //   headers: {
-    //     'Authorization': 'Bearer '.concat(access_token)
-    //   }
-    // }
-    const url = 'https://kanztainer.com/goodyz/api/v1/me'
-    axios.post(url, header).then(async(res)=> {
+  async refreshUser() {
+    const user_access_token = await AsyncStorage.getItem('access_token');
+    let access_token = {
+      headers: {
+        'Authorization': 'Bearer '.concat(user_access_token)
+      }
+    };
+    const url = 'https://kanztainer.com/goodyz/api/v1/me';
+    
+    axios.post(url, {}, access_token).then(async(res)=> {
       console.log(res.data.data);
       await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
     }).catch((error)=> {
@@ -155,18 +157,34 @@ export default class VoucherDetailCmp extends Component {
         } 
         <ScrollView style={{backgroundColor:color.ligth}}>
           <View style={mainContainer}>
-            <ImageCard 
-              logo={{uri:this.state.data.sponser.logo_url}} 
-              text={this.state.data.title}  
-              bigImage={{uri:this.state.data.banner_image_url}}
-              isRedeemed={this.state.isRedeemed}
-              qrCode={{uri:this.state.data.qrcode_url}}
-              onPress={this.gotoDetail}
-              isDetail={true}
-              expire={this.state.data.expiration_date}
-              description={this.state.data.description}
-              height={200}
-            />
+            {
+              this.state.type == 'addWallet' ?
+              <ImageCard 
+                logo={{uri:this.state.data.sponser.logo_url}} 
+                text={this.state.data.title}  
+                bigImage={{uri:this.state.data.banner_image_url}}
+                isRedeemed={this.state.isRedeemed}
+                qrCode={{uri:this.state.data.qrcode_url}}
+                onPress={this.gotoDetail}
+                isDetail={true}
+                expire={this.state.data.expiration_date}
+                description={this.state.data.description}
+                height={200}
+              />
+              :
+              <ImageCard 
+                logo={{uri:this.state.data.offer.sponser.logo_url}} 
+                text={this.state.data.offer.title}  
+                bigImage={{uri:this.state.data.offer.banner_image_url}}
+                isRedeemed={this.state.isRedeemed}
+                qrCode={{uri:this.state.data.offer.qrcode_url}}
+                onPress={this.gotoDetail}
+                isDetail={true}
+                expire={this.state.data.offer.expiration_date}
+                description={this.state.data.offer.description}
+                height={200}
+              />  
+            }
           </View>
         </ScrollView>
         <View style={btnContainer}>

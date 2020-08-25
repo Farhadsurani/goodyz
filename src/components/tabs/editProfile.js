@@ -116,20 +116,38 @@ export default class EditProfileCmp extends Component {
       this.setState({showSpinner:true});
 
       axios.put(url, bodyParameters, access_token).then((res)=> {
+        this.refreshUser();
         this.setState({showSpinner:false});
         console.log(res.data);
         // this.setState({showAlert:true, errorMsg:'Password changed successfuly.', errorTitle:'Success'});
-        setTimeout(()=> {
-          this.props.navigation.pop();
-        }, 2000)
+        // setTimeout(()=> {
+          // this.props.navigation.pop();
+        // }, 2000)
       }).catch((error)=> {
         this.setState({showSpinner:false});
         console.log('error', error);
         this.setState({showAlert:true, errorMsg:'Something went wrong. '+error, errorTitle:'Error!!'});
       });
     }
-    // this.props.navigation.pop();
+    
   };
+
+  async refreshUser() {
+    const user_access_token = await AsyncStorage.getItem('access_token');
+    let access_token = {
+      headers: {
+        'Authorization': 'Bearer '.concat(user_access_token)
+      }
+    };
+    const url = 'https://kanztainer.com/goodyz/api/v1/me';
+    axios.post(url, {}, access_token).then(async(res)=> {
+      console.log(res.data.data);
+      await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
+      this.props.navigation.pop();
+    }).catch((error)=> {
+      console.log('error', error);
+    });
+  }
 
   render(){
     const { mainContainer, profilePicture, spinnerTextStyle, horizontal } = styles;

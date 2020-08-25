@@ -44,18 +44,19 @@ export default class ProfileCmp extends Component {
     this.state = {
       showSpinner:false,
       showAlert:false,
+      userData:''
     }
   }
 
   async componentDidMount() {
     this.focusListener = this.props.navigation.addListener("didFocus", async() => {
       const isUserLogedIn = await this.checkUserLoggedIn();
-      console.log('isUserLogedIn', isUserLogedIn)
+      // console.log('isUserLogedIn', isUserLogedIn)
       if(!isUserLogedIn){
         this.props.navigation.pop();
         this.props.navigation.navigate('Signin');
       }
-      console.log(isUserLogedIn);
+      // console.log(isUserLogedIn);
     });
   }
 
@@ -64,8 +65,12 @@ export default class ProfileCmp extends Component {
       const value = await AsyncStorage.getItem('isUserLogedIn')
       if(value == null || value == false)
         return false;
-      else
+      else{
+        const user = await AsyncStorage.getItem('userData');
+        this.setState({userData: JSON.parse(user)});
+        console.log(this.state.userData.details.image_url);
         return true;
+      }
     } 
     catch(e) {
       console.log(e);
@@ -81,7 +86,7 @@ export default class ProfileCmp extends Component {
     const user_access_token = await AsyncStorage.getItem('access_token');
     let access_token = {
       headers: {
-        'Authorization': 'Bearer '+user_access_token
+        'Authorization': 'Bearer '.concat(user_access_token)
       }
     };
     axios.post('https://kanztainer.com/goodyz/api/v1/logout', {}, access_token).then(
@@ -91,16 +96,18 @@ export default class ProfileCmp extends Component {
         await AsyncStorage.removeItem('isUserLogedIn');
         await AsyncStorage.removeItem('userType');
         await AsyncStorage.removeItem('userData');
+        await AsyncStorage.removeItem('access_token');
         this.props.navigation.navigate('QrCode');
       }
     ).catch(
      async (error)=> {
         this.setState({showSpinner: false});
         console.log('error', error);
-        await AsyncStorage.removeItem('isUserLogedIn');
-        await AsyncStorage.removeItem('userType');
-        await AsyncStorage.removeItem('userData');
-        this.props.navigation.navigate('QrCode');
+        // await AsyncStorage.removeItem('isUserLogedIn');
+        // await AsyncStorage.removeItem('userType');
+        // await AsyncStorage.removeItem('userData');
+        // await AsyncStorage.removeItem('access_token');
+        // this.props.navigation.navigate('QrCode');
         this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
       }
     );
@@ -111,10 +118,17 @@ export default class ProfileCmp extends Component {
 
     return(
       <View style={mainContainer}>
-        <Image style={profilePicture} source={images.profilePicture} />
-        <Text style={profileName}>Mitchell Williamson</Text>
-        <Text style={profileEmail}>pamela.foster@example.com</Text>
-        <Text style={profileEmail}>(843) 555-0130</Text>
+        {
+          this.state.userData != '' ?
+          <>
+            <Image style={profilePicture} source={{uri:this.state.userData.details.image_url}} />
+            <Text style={profileName}>{this.state.userData.name}</Text>
+            <Text style={profileEmail}>{this.state.userData.email}</Text>
+            {/* <Text style={profileEmail}>(843) 555-0130</Text> */}
+          </>
+          :
+          null
+        }
         <Text style={hrLine}></Text>
         <View style={{marginTop:30, width:'90%'}}>
           <TouchableOpacity activeOpacity={0.5} onPress={()=> this.props.navigation.navigate('ChangePasswordCmp')}>

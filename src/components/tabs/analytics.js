@@ -124,24 +124,24 @@ export default class AnalyticsCmp extends Component {
     const {mainContainer, mainCard, mainCardText, heading, spinnerTextStyle, horizontal} = styles;
     return(
       <View style={mainContainer}>
-        <ScrollView>
-          <TouchableOpacity activeOpacity={0.5} onPress={this.gotoTotal}>
-            <View style={mainCard}>
-              <Text style={[mainCardText, {fontSize:24}]}>{this.state.data.total_redeemed_count}</Text>
-              <Text style={[mainCardText, {fontSize:16}]}>Total Voucher Redeemed</Text>
-            </View>
-          </TouchableOpacity>
-
-          <Text style={heading}>Today</Text>
-          
-          <FlatList
-            pagingEnabled={false}            
-            showsVerticalScrollIndicator={false}
-            data={this.state.data.offers}
-            renderItem={this.renderData}
-            keyExtractor={(item, index) => index.toString()}
-          />
-        </ScrollView>
+        <FlatList
+          ListHeaderComponent= {
+            <>
+              <TouchableOpacity activeOpacity={0.5} onPress={this.gotoTotal}>
+                <View style={mainCard}>
+                  <Text style={[mainCardText, {fontSize:24}]}>{this.state.data.total_redeemed_count}</Text>
+                  <Text style={[mainCardText, {fontSize:16}]}>Voucher Redeemed Today</Text>
+                </View>
+              </TouchableOpacity>
+              <Text style={heading}>Today</Text>
+            </>
+          }
+          pagingEnabled={false}            
+          showsVerticalScrollIndicator={false}
+          data={this.state.data.offers}
+          renderItem={this.renderData}
+          keyExtractor={(item, index) => index.toString()}
+        />
         <View style={horizontal}>
           <Spinner 
             textContent={'Loading...'}

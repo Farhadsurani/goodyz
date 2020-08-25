@@ -61,7 +61,7 @@ export default class QrDetailCmp extends Component {
               logo={{uri:this.state.data.logo_url}} 
               text={this.state.data.name}
               bigImage={{uri:this.state.data.banner_image_url}}
-              isRedeemed={data[1].isRedeemed}
+              isRedeemed={this.state.data.is_redeemed}
               // onPress={this.gotoDetail}
               isDetail={true}
               expire={data[1].expire}

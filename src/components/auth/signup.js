@@ -34,11 +34,11 @@ export default class Signup extends Component {
   constructor(props){
     super(props);
     this.state = {
-      name:'',
+      name:'hello',
       image:'',
-      email:'',
-      password:'',
-      password_confirmation:'',
+      email:'hello@hello.com',
+      password:'hello1',
+      password_confirmation:'hello1',
       device_token:'123456',
       device_type:'android',
       isError:false,
@@ -62,7 +62,7 @@ export default class Signup extends Component {
     // if(this.camera) {
     const options = { quality: 0.1, base64: false };
     const data = await this.camera.takePictureAsync(options);
-    console.log(data);
+    console.log(data.uri);
     this.resize(data.uri);
     this.setState({ showCamera: !this.state.showCamera});
     // }
@@ -84,10 +84,10 @@ export default class Signup extends Component {
     });
   }
 
-  convertToBase64 = async(uri) => {
-    const base64 = await RNFS.readFile(uri, 'base64');
-    this.setState({pictureBase64: base64});
-  }
+  // convertToBase64 = async(uri) => {
+  //   const base64 = await RNFS.readFile(uri, 'base64');
+  //   this.setState({pictureBase64: base64});
+  // }
 
   signup = async() => {
     this.setState({isError:false});
@@ -131,28 +131,29 @@ export default class Signup extends Component {
 
     else {
       this.setState({showSpinner:true});
-      // const data = {
-      //   name:this.state.name, 
-      //   image:this.state.picture, 
-      //   email:this.state.email, 
-      //   password:this.state.password,
-      //   password_confirmation:this.state.password_confirmation, 
-      //   device_token:this.state.device_token, 
-      //   device_type:this.state.device_type
-      // };
-      var formData = new FormData();
-      formData.append('name', this.state.name);
-      formData.append('email', this.state.email);
-      formData.append('password', this.state.email);
-      formData.append('password_confirmation', this.state.password_confirmation);
-      formData.append('device_token', this.state.device_token);
-      formData.append('device_type', this.state.device_type);
-      formData.append('image', {
-        uri:this.state.picture,
-        name:'profile.jpg',
-        type:'image/jpg'
-      })
-      axios.post('https://kanztainer.com/goodyz/api/v1/register', formData).then(
+      const data = {
+        name:this.state.name, 
+        // image:this.state.picture,
+        email:this.state.email, 
+        password:this.state.password,
+        password_confirmation:this.state.password_confirmation, 
+        device_token:this.state.device_token, 
+        device_type:this.state.device_type
+      };
+      // var formData = new FormData();
+      // formData.append('name', this.state.name);
+      // formData.append('email', this.state.email);
+      // formData.append('password', this.state.email);
+      // // formData.append('password_confirmation', this.state.password_confirmation);
+      // formData.append('device_token', this.state.device_token);
+      // formData.append('device_type', this.state.device_type);
+      // formData.append('image', {
+      //   uri:this.state.picture,
+      //   name:'profile.jpg',
+      //   type:'image/jpg'
+      // });
+      
+      axios.post('https://kanztainer.com/goodyz/api/v1/register', data).then(
         async(res)=> {
           console.log(res.data.data.user);
           console.log(res.data.success);
@@ -161,6 +162,7 @@ export default class Signup extends Component {
             try {
               const userState = await AsyncStorage.setItem('isUserLogedIn', 'true');
               const userData = await AsyncStorage.setItem('userData', JSON.stringify(res.data.data.user));
+              const access_token = await AsyncStorage.setItem('access_token',res.data.data.user.access_token);
               this.props.navigation.navigate('Tabs')
               // if(this.state.email == 'user')
               //   this.props.navigation.navigate('Tabs')
@@ -181,6 +183,7 @@ export default class Signup extends Component {
         (error)=> {
           this.setState({showSpinner: false});
           console.log('error', error);
+          // this.setState({showAlert:true, errorMsg: error, errorTitle:'Error!!'})
         }
       );
     }
