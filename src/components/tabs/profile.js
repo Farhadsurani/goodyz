@@ -103,12 +103,12 @@ export default class ProfileCmp extends Component {
      async (error)=> {
         this.setState({showSpinner: false});
         console.log('error', error);
-        // await AsyncStorage.removeItem('isUserLogedIn');
-        // await AsyncStorage.removeItem('userType');
-        // await AsyncStorage.removeItem('userData');
-        // await AsyncStorage.removeItem('access_token');
-        // this.props.navigation.navigate('QrCode');
-        this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
+        await AsyncStorage.removeItem('isUserLogedIn');
+        await AsyncStorage.removeItem('userType');
+        await AsyncStorage.removeItem('userData');
+        await AsyncStorage.removeItem('access_token');
+        this.props.navigation.navigate('QrCode');
+        // this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
       }
     );
   }

@@ -138,6 +138,7 @@ export default class ChangePasswordCmp extends Component {
             }}
           />
           <FloatingInput
+            secureTextEntry
             margin={ms(10)}
             width={'95%'} 
             label={'New Password'} 
@@ -148,6 +149,7 @@ export default class ChangePasswordCmp extends Component {
             }}
           />
           <FloatingInput
+            secureTextEntry
             margin={ms(10)}
             width={'95%'} 
             label={'Confirm Password'} 
