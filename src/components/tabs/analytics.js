@@ -91,7 +91,7 @@ export default class AnalyticsCmp extends Component {
 
   renderData = (item, index) => {
     const {mainContainerList, headingList} = styles;
-   return(
+    return(
       <TouchableOpacity activeOpacity={0.5} onPress={()=>this.gotoSingle(item.item)}>
         <View style={mainContainerList}>
           <Text style={headingList}>{this.trimText(item.item.title)}</Text>
