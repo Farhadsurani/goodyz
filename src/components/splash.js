@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Animated, Easing, Image, AsyncStorage } from "react-native";
+// import {decode, encode} from 'base-64'
 
 class Splash extends React.Component {
   constructor(props) {
@@ -16,6 +17,14 @@ class Splash extends React.Component {
     };
     this.rotateAnimation();
     this.navigate();
+
+    // if (!global.btoa) {
+    //   global.btoa = encode;
+    // }
+    
+    // if (!global.atob) {
+    //   global.atob = decode;
+    // } 
   }
   
   async navigate() {

@@ -8,11 +8,14 @@ import { data } from '../../constants/data';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Dialog from "react-native-dialog";
 import axios from 'axios';
+import qs from 'qs';
+
 import { ScaledSheet } from 'react-native-size-matters';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft,  faCheckCircle } from '@fortawesome/free-solid-svg-icons';
- 
+import { requestOneTimePayment, requestBillingAgreement } from 'react-native-paypal';
+
 export default class VoucherDetailCmp extends Component {
 
   static navigationOptions = ({ navigation }) => {
@@ -89,6 +92,75 @@ export default class VoucherDetailCmp extends Component {
 
   handleCancel() {
     this.setState({showAlert:false});
+  }
+
+  initiatePayment = async() => {
+    this.setState({showSpinner:true});
+    const basicAuth = {
+      username:'AXj9nmFJw5VcGl3qwuFwAmYd38799V3NFEasfRYFgvMY1GPq_n422-OMXlz_33tdNeQ0_PyTV37jUj8Q',
+      password:'EAYP4dEwNw6hMbmsPACb8VXe_tMbnn8GmOY3YSUuZehQQ7CXMY4EKGA5KxAbMNWdgrLpRyULC0wtAwAX'
+    }
+    // axios.post('https://api.sandbox.paypal.com/v1/oauth2/token', qs.stringify({
+    //   grant_type: 'client_credentials',
+    //   withCredentials: true,
+    //   headers:{
+    //     'Accept': 'application/json',
+    //     'Accept-Language': 'en_US',
+    //     'Content-Type': 'application/x-www-form-urlencoded',
+    //   },
+    //   auth: {
+    //     username: 'AXj9nmFJw5VcGl3qwuFwAmYd38799V3NFEasfRYFgvMY1GPq_n422-OMXlz_33tdNeQ0_PyTV37jUj8Q',
+    //     password: 'EAYP4dEwNw6hMbmsPACb8VXe_tMbnn8GmOY3YSUuZehQQ7CXMY4EKGA5KxAbMNWdgrLpRyULC0wtAwAX'
+    //   }
+    // })).then((response) => {
+    //   console.log(response);
+    // }).catch((err) => {console.log(err);});
+
+    axios.post('https://api.sandbox.paypal.com/v1/oauth2/token', {grant_type:'client_credentials'},{
+      withCredentials: true,
+      headers:{
+        'Accept': 'application/json',
+        'Accept-Language': 'en_US',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      }
+    },
+    {auth:qs.stringify({
+      username:'AXj9nmFJw5VcGl3qwuFwAmYd38799V3NFEasfRYFgvMY1GPq_n422-OMXlz_33tdNeQ0_PyTV37jUj8Q',
+      password:'EAYP4dEwNw6hMbmsPACb8VXe_tMbnn8GmOY3YSUuZehQQ7CXMY4EKGA5KxAbMNWdgrLpRyULC0wtAwAX'
+    })
+    }).then(
+      async(res)=> {
+        console.log(res.data);
+        this.setState({showSpinner:false})
+      }
+    ).catch(
+      async(error)=> {
+        this.setState({showSpinner: false});
+        console.log('error', error);
+        this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
+      }
+    );
+    // const {
+    //   nonce,
+    //   payerId,
+    //   email,
+    //   firstName,
+    //   lastName,
+    //   phone 
+    // } = await requestOneTimePayment(
+    //   token,
+    //   {
+    //     amount: '5', // required
+    //     // any PayPal supported currency (see here: https://developer.paypal.com/docs/integration/direct/rest/currency-codes/#paypal-account-payments)
+    //     currency: 'GBP',
+    //     // any PayPal supported locale (see here: https://braintree.github.io/braintree_ios/Classes/BTPayPalRequest.html#/c:objc(cs)BTPayPalRequest(py)localeCode)
+    //     localeCode: 'en_GB', 
+    //     shippingAddressRequired: false,
+    //     userAction: 'commit', // display 'Pay Now' on the PayPal review page
+    //     // one of 'authorize', 'sale', 'order'. defaults to 'authorize'. see details here: https://developer.paypal.com/docs/api/payments/v1/#payment-create-request-body
+    //     intent: 'authorize', 
+    //   }
+    // );
   }
 
   addToWallet= async () => {
@@ -196,7 +268,7 @@ export default class VoucherDetailCmp extends Component {
               btnName={this.state.isAddWalletBtn?'GO TO WALLET':'ADD TO WALLET'} 
               borderRadius={50} 
               width={Dimensions.get('screen').width-50}
-              onPress={this.addToWallet}
+              onPress={this.initiatePayment}
             />
             :
             <Button 

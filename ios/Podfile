@@ -40,6 +40,10 @@ target 'Goodzy' do
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
+  # pod 'RNPaypal', :path => '../node_modules/react-native-paypal'
+  pod 'RNPaypal', :path => '../node_modules/react-native-paypal/ios'
+  pod 'Braintree', '~> 4.19.0'
+
   target 'GoodzyTests' do
     inherit! :search_paths
     # Pods for testing

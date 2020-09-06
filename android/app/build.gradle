@@ -181,10 +181,12 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-paypal')
     implementation project(':react-native-permissions')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
-
+    implementation "com.braintreepayments.api:braintree:2.17.0"
+    
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
         debugImplementation files(hermesPath + "hermes-debug.aar")

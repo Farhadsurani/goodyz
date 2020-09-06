@@ -9,6 +9,7 @@ import { color, images } from '../../constants/theme';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Dialog from "react-native-dialog";
+import { requestOneTimePayment, requestBillingAgreement } from 'react-native-paypal';
 
 const { height:deviceHeigth, width:deviceWidth } = Dimensions.get('screen');
 
@@ -31,11 +32,11 @@ export default class QrCodeCmp extends Component {
   
   async componentDidMount() {
     // axios.defaults.headers.post['Content-Type'] = 'application/json';
-    // const userType = await AsyncStorage.getItem('userType');
-    // if(userType == 'user')
-    //   setTimeout(()=> {
-    //     this.onSuccess({data:16})
-    //   }, 2000)
+    const userType = await AsyncStorage.getItem('userType');
+    if(userType == 'user')
+      setTimeout(()=> {
+        this.onSuccess({data:16})
+      }, 2000)
   }
 
   handleCancel() {
@@ -52,20 +53,20 @@ export default class QrCodeCmp extends Component {
 
   onSuccess = async e => {
     console.log('onSuccess');
-    const parseQrData = JSON.parse(e.data);
-    console.log(parseQrData.type, parseQrData.id)
+    // const parseQrData = JSON.parse(e.data);
+    // console.log(parseQrData.type, parseQrData.id)
     
     this.setState({showSpinner:true});
-    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+parseQrData.id).then((res)=> {
+    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+'22').then((res)=> {
       this.setState({showSpinner:false});
       // setTimeout(()=> {
       //   this.scanner.reactivate();
       // }, 3000)
       console.log(res.data);
-      if(parseQrData.type == 'offer')
+      // if(parseQrData.type == 'offer')
         this.props.navigation.navigate('QrDetailCmp', {data: res.data});
-      else
-        this.props.navigation.navigate('AnalyticsCmp');
+      // else
+      //   this.props.navigation.navigate('AnalyticsCmp');
 
     }).catch((error)=> {
       this.setState({showSpinner:false});
