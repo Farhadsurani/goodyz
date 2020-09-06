@@ -42,21 +42,28 @@ export default class GoodyzListCmp extends Component {
 
   voucherDetail = (data) => {
     this.addImpresion(data.id);
-    this.props.navigation.navigate('VoucherDetailCmp', {type:'addWallet', data:data});
+    // this.props.navigation.navigate('VoucherDetailCmp', {type:'addWallet', data:data});
   }
   
-  addImpresion(id) {
-    console.log(id)
-    axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+id+'&is_clicked=1').then((res)=> {
+  async addImpresion(id) {
+    console.log('addImpresion: ', id);
+    const access_token = await AsyncStorage.getItem('access_token');
+    const header = {
+      headers: {
+        'Authorization': 'Bearer '.concat(access_token)
+      }
+    }
+    console.log(header);
+    axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+id+'&is_clicked=1', header).then((res)=> {
+      
       console.log(res.data);
       this.refreshUser();
     }).catch((error)=> {
-      console.log('error', error);
+      console.log('error addImpression: ', error);
     });
   }
   
   async refreshUser() {
-    console.log('refreshUser');
     const access_token = await AsyncStorage.getItem('access_token');
     const header = {
       headers: {
@@ -65,10 +72,11 @@ export default class GoodyzListCmp extends Component {
     }
     const url = 'https://kanztainer.com/goodyz/api/v1/me'
     axios.post(url, header).then(async(res)=> {
+      console.log('refreshUser: ');
       console.log(res.data.data);
       await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
     }).catch((error)=> {
-      console.log('error', error);
+      console.log('error refreshUser: ', error);
     });
   }
 

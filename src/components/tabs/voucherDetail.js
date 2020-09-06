@@ -52,7 +52,8 @@ export default class VoucherDetailCmp extends Component {
     if(this.state.data.is_redeemed == 1)
       this.setState({isRedeemed: true});
 
-    console.log('type: ', this.state.type)
+    console.log('type: ', this.state.type);
+    console.log('data: ', this.state.data)
   }
 
   gotoDetail = () => {
