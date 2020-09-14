@@ -15,6 +15,7 @@ import ChangePasswordCmp from '../components/tabs/chnagePassword';
 import VoucherDetailCmp from '../components/tabs/voucherDetail';
 import QrDetailCmp from '../components/tabs/qrDetail';
 import GoodyzListCmp from '../components/tabs/goodyzList';
+import EventMediaCmp from '../components/tabs/eventMedia';
 
 import { color } from '../constants/theme';
 
@@ -67,6 +68,7 @@ const QrCode =
       QrDetailCmp,
       GoodyzListCmp,
       VoucherDetailCmp,
+      EventMediaCmp
       // Signin
     },
     {
@@ -95,11 +97,11 @@ const QrCode =
           navigationOptions.tabBarVisible = false;
         else if (routeName === 'VoucherDetailCmp')
           navigationOptions.tabBarVisible = false;
-        
         else if (routeName === 'Signin')
           navigationOptions.tabBarVisible = false;
-        // }
-        
+        else if (routeName === 'EventMediaCmp')
+          navigationOptions.tabBarVisible = false;
+
         return navigationOptions;
       }
     }

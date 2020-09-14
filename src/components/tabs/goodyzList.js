@@ -21,11 +21,11 @@ export default class GoodyzListCmp extends Component {
 			headerStyle: {
 				backgroundColor: color.primary
       },
-      // headerLeft:(
-      //   <TouchableOpacity activeOpacity={0.5} style={{marginLeft:10}} onPress={()=> navigation.pop()}>
-      //     <FontAwesomeIcon icon={faChevronLeft} size={20} color={color.dark} />
-      //   </TouchableOpacity>
-      // )
+      headerLeft:(
+        <TouchableOpacity activeOpacity={0.5} style={{marginLeft:10}} onPress={()=> navigation.pop()}>
+          <FontAwesomeIcon icon={faChevronLeft} size={20} color={color.dark} />
+        </TouchableOpacity>
+      )
 		}
   };
 
@@ -42,20 +42,17 @@ export default class GoodyzListCmp extends Component {
 
   voucherDetail = (data) => {
     this.addImpresion(data.id);
-    // this.props.navigation.navigate('VoucherDetailCmp', {type:'addWallet', data:data});
+    this.props.navigation.navigate('VoucherDetailCmp', {type:'addWallet', data:data});
   }
   
   async addImpresion(id) {
-    console.log('addImpresion: ', id);
     const access_token = await AsyncStorage.getItem('access_token');
     const header = {
       headers: {
         'Authorization': 'Bearer '.concat(access_token)
       }
     }
-    console.log(header);
     axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+id+'&is_clicked=1', header).then((res)=> {
-      
       console.log(res.data);
       this.refreshUser();
     }).catch((error)=> {
@@ -71,8 +68,7 @@ export default class GoodyzListCmp extends Component {
       }
     }
     const url = 'https://kanztainer.com/goodyz/api/v1/me'
-    axios.post(url, header).then(async(res)=> {
-      console.log('refreshUser: ');
+    axios.post(url, {},header).then(async(res)=> {
       console.log(res.data.data);
       await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
     }).catch((error)=> {

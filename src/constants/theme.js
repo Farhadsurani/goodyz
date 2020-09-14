@@ -15,7 +15,9 @@ const images = {
     logo: require('../assets/images/logo.png'),
     background:require('../assets/images/background.jpg'),
     profilePicture:require('../assets/images/profile.png'),
-    qrCode:require('../assets/images/qrCode.png')
+    qrCode:require('../assets/images/qrCode.png'),
+    cameraIcon:require('../assets/images/camera.png'),
+    galleryIcon:require('../assets/images/photo.png')
 }
 
 export {color, images};

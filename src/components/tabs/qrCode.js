@@ -9,6 +9,7 @@ import { color, images } from '../../constants/theme';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Dialog from "react-native-dialog";
+import { requestOneTimePayment, requestBillingAgreement } from 'react-native-paypal';
 
 const { height:deviceHeigth, width:deviceWidth } = Dimensions.get('screen');
 
@@ -64,8 +65,8 @@ export default class QrCodeCmp extends Component {
       console.log(res.data);
       if(e.type == 'offer')
         this.props.navigation.navigate('QrDetailCmp', {data: res.data});
-      else
-        this.props.navigation.navigate('AnalyticsCmp');
+      // else
+      //   this.props.navigation.navigate('AnalyticsCmp');
 
     }).catch((error)=> {
       this.setState({showSpinner:false});

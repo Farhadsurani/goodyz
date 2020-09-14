@@ -8,11 +8,14 @@ import { data } from '../../constants/data';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Dialog from "react-native-dialog";
 import axios from 'axios';
+import qs from 'qs';
+
 import { ScaledSheet } from 'react-native-size-matters';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft,  faCheckCircle } from '@fortawesome/free-solid-svg-icons';
- 
+import { requestOneTimePayment, requestBillingAgreement } from 'react-native-paypal';
+
 export default class VoucherDetailCmp extends Component {
 
   static navigationOptions = ({ navigation }) => {
