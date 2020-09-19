@@ -41,19 +41,22 @@ export default class EventMediaCmp extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
+      id:this.props.navigation.getParam('id'),
 			data:[],
-			modalVisible: false
+      modalVisible: false,
+      showCamera:false,
+      profileImageAvatar:''
 		}
 	}
 
 	async componentDidMount() {
-		const access_token = await AsyncStorage.getItem('access_token');
+    const access_token = await AsyncStorage.getItem('access_token');
     const header = {
       headers:{
         'Authorization':'Bearer '.concat(access_token)
       }
     }
-		axios.get('https://kanztainer.com/goodyz/api/v1/event/get-media/22', header).then(
+		axios.get('https://kanztainer.com/goodyz/api/v1/event/get-media/'+this.state.id, header).then(
 			response=> {
 				console.log(response.data);
 				this.setState({data:response.data.data});
@@ -62,7 +65,6 @@ export default class EventMediaCmp extends Component {
 				console.log(error)
 			}
 		);
-		// this.selectPicture();
 	}
 
 	openCamera = () => {
@@ -105,20 +107,23 @@ export default class EventMediaCmp extends Component {
     const data = await this.camera.takePictureAsync(options);
     this.resize(data.uri);
     this.setState({ showCamera: !this.state.showCamera});
+    // this.uploadStory(data.uri);
     // }
   };
 
   resize = async(picture) => {
-    ImageResizer.createResizedImage(picture, 500, 400, 'JPEG', 100, 0, RNFS.DocumentDirectoryPath)
+    ImageResizer.createResizedImage(picture, 500, 400, 'JPEG', 100)
     .then(({uri}) => {
-      this.setState({profileImageAvatar:uri})
-      this.convertToBAse64(uri)
+      console.log('resize function URI: ', uri)
+      this.setState({profileImageAvatar:uri});
+      this.uploadStory(uri);
+      // this.convertToBAse64(uri)
     })
     .catch(err => {
         console.log(err);
         return Alert.alert(
-            'Unable to resize the photo',
-            // 'Check the console for full the error message',
+          'Unable to resize the photo',
+          // 'Check the console for full the error message',
         );
     });
   }
@@ -131,7 +136,38 @@ export default class EventMediaCmp extends Component {
     });
     // console.log(this.state.profileImageBase64);
 	}
-	
+  
+  async uploadStory(uri) {
+    const user = await AsyncStorage.getItem('userData');
+    const access_token = await AsyncStorage.getItem('access_token');
+    const header = {
+      headers:{
+        'Authorization':'Bearer '.concat(access_token)
+      }
+    };
+    const formData = new FormData();
+    formData.append('event_id', this.state.id);
+    formData.append('user_id', JSON.parse(user).id);
+    formData.append('media_type', 'jpeg');
+    formData.append('media',{
+      uri:uri,
+      name:'reciept.jpg',
+      type:'image/jpg'
+    });
+    
+		axios.post('https://kanztainer.com/goodyz/api/v1/event/upload-media', formData, header).then(
+			response=> {
+        console.log('upload media')
+        console.log(response.data);
+        this.componentDidMount();
+			},
+			error => {
+        console.log('upload media')
+				console.log(error)
+			}
+		);
+  }
+
 	renderData = (item) => {
 		const {imageCard, roundImage, name} = styles;
 		return(
@@ -237,7 +273,7 @@ export default class EventMediaCmp extends Component {
         </Modal>
 				<FlatList
 					numColumns={3}
-					data={data}
+					data={this.state.data}
 					renderItem={this.renderData}
           keyExtractor={(item, index) => index.toString()}
 				/>

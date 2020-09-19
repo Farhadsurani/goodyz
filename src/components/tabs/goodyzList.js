@@ -5,6 +5,8 @@ import { color } from '../../constants/theme';
 
 import axios from 'axios';
 import { ScaledSheet } from 'react-native-size-matters';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 
 const { width:deviceWidth, height:deviceHeight } = Dimensions.get('screen');
 

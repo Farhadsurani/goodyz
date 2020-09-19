@@ -33,7 +33,7 @@ export default class QrDetailCmp extends Component {
         </TouchableOpacity>
       ),
       headerRight:(
-        <TouchableOpacity activeOpacity={0.5} style={{marginRight:10}} onPress={()=> navigation.navigate('EventMediaCmp')}>
+        <TouchableOpacity activeOpacity={0.5} style={{marginRight:10}} onPress={()=> navigation.state.params.dispatch()}>
           <FontAwesomeIcon icon={faHistory} size={20} color={color.dark} />
         </TouchableOpacity>
       )
@@ -56,6 +56,13 @@ export default class QrDetailCmp extends Component {
     if(this.state.data.event_fee > 0) {
       this.checkUserEventPayment();
     }
+    this.props.navigation.setParams({
+      dispatch: this.dispatch.bind(this)
+    });
+  }
+
+  dispatch() {
+    this.props.navigation.navigate('EventMediaCmp', {id: this.state.data.id});
   }
 
   gotoDetail = () => {
@@ -75,6 +82,7 @@ export default class QrDetailCmp extends Component {
         'Authorization':'Bearer '.concat(access_token)
       }
     }
+    console.log(header)
     axios.get(URL, header).then(
       response=> {
         console.log(response.data);
@@ -89,7 +97,7 @@ export default class QrDetailCmp extends Component {
               this.checkUserEventPayment();
             },
             error => {
-              console.log(error);
+              console.log('refresh token error: ', error);
               this.setState({showSpinner:false});
             }
           );
@@ -146,7 +154,7 @@ export default class QrDetailCmp extends Component {
             'phone: '+phone 
           );
           this.setState({showSpinner:false});
-          this.storeUserPayment();
+          this.storeUserPayment(nonce);
         }
         catch(ex) {
           console.log(ex.toString());
@@ -162,7 +170,7 @@ export default class QrDetailCmp extends Component {
     )
   }
 
-  async storeUserPayment() {
+  async storeUserPayment(nonce) {
     const URL = 'https://kanztainer.com/goodyz/api/v1/event/user-paypal-payment';
     const access_token = await AsyncStorage.getItem('access_token');
     const header = {
@@ -170,10 +178,18 @@ export default class QrDetailCmp extends Component {
         'Authorization':'Bearer '.concat(access_token)
       }
     }
-
-    axios.post(URL, {}, header).then(
+    const data = {
+      event_id:this.state.data.id,
+      amount:this.state.data.event_fee,
+      payment_status:'paid',
+      payment_gateway:'paypal',
+      transaction_id:nonce,
+      transaction_response:'200'
+    };
+    console.log(data);
+    axios.post(URL, data, header).then(
       response=> console.log(response),
-      error => console.log(error)
+      error => console.log('store user Payment: ', error)
     )
   }
 
