@@ -52,7 +52,7 @@ export default class QrDetailCmp extends Component {
   }
 
   componentDidMount() {
-    console.log(this.state.data);
+    console.log('event_fee: ', this.state.data.event_fee);
     if(this.state.data.event_fee > 0) {
       this.checkUserEventPayment();
     }
@@ -74,6 +74,7 @@ export default class QrDetailCmp extends Component {
   }
 
   async checkUserEventPayment() {
+    console.log('this.checkUserEventPayment')
     this.setState({showSpinner:true});
     const URL = 'https://kanztainer.com/goodyz/api/v1/event/check-user-payment/'+this.state.data.id;
     const access_token = await AsyncStorage.getItem('access_token');
@@ -82,7 +83,6 @@ export default class QrDetailCmp extends Component {
         'Authorization':'Bearer '.concat(access_token)
       }
     }
-    console.log(header)
     axios.get(URL, header).then(
       response=> {
         console.log(response.data);
