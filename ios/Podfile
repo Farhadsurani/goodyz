@@ -46,6 +46,8 @@ target 'Goodzy' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'react-native-stripe-payments', :path => '../node_modules/react-native-stripe-payments'
+
   target 'GoodzyTests' do
     inherit! :search_paths
     # Pods for testing

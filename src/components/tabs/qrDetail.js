@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Dimensions, ScrollView, Image, AsyncStorage } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, ScrollView, Image, AsyncStorage, Modal } from 'react-native';
 
 import { ImageCard, Button } from '../common';
 import { color } from '../../constants/theme';
@@ -7,10 +7,11 @@ import { data } from '../../constants/data';
 
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
+
 import { ScaledSheet } from 'react-native-size-matters';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronLeft, faHistory } from '@fortawesome/free-solid-svg-icons';
-import { requestOneTimePayment } from 'react-native-paypal';
+import { faChevronLeft, faHistory, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-input";
 
 const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
 
@@ -48,6 +49,9 @@ export default class QrDetailCmp extends Component {
       width:'',
       height:'',
       showSpinner:false,
+      modalVisible: false,
+      status:false,
+      values:''
     }
   }
 
@@ -75,7 +79,7 @@ export default class QrDetailCmp extends Component {
 
   async checkUserEventPayment() {
     console.log('this.checkUserEventPayment')
-    this.setState({showSpinner:true});
+    // this.setState({showSpinner:true});
     const URL = 'https://kanztainer.com/goodyz/api/v1/event/check-user-payment/'+this.state.data.id;
     const access_token = await AsyncStorage.getItem('access_token');
     const header = {
@@ -109,65 +113,46 @@ export default class QrDetailCmp extends Component {
   }
 
   initiatePayment = async() => {
-    let token = '';
-    console.log(this.state.data.event_fee);
-    const URL = 'https://kanztainer.com/goodyz/api/v1/paypal/token';
-    const access_token = await AsyncStorage.getItem('access_token');
-    const header = {
-      headers:{
-        'Authorization':'Bearer '.concat(access_token)
-      }
-    }
-    axios.post(URL, {}, header).then(
-      async response=> {
-        token = (response.data.data.access_token);
-        // token = 'sandbox_9dbg82cq_dcpspy2brwdjr3qn'
-        console.log(token);
-        try {
-          const {
-            nonce,
-            payerId,
-            email,
-            firstName,
-            lastName,
-            phone 
-          } = await requestOneTimePayment(
-            'sandbox_9dbg82cq_dcpspy2brwdjr3qn',
-            {
-              amount: this.state.data.event_fee.toString(), // required
-              // any PayPal supported currency (see here: https://developer.paypal.com/docs/integration/direct/rest/currency-codes/#paypal-account-payments)
-              currency: 'USD',
-              // any PayPal supported locale (see here: https://braintree.github.io/braintree_ios/Classes/BTPayPalRequest.html#/c:objc(cs)BTPayPalRequest(py)localeCode)
-              localeCode: 'en_US', 
-              shippingAddressRequired: false,
-              userAction: 'commit', // display 'Pay Now' on the PayPal review page
-              // one of 'authorize', 'sale', 'order'. defaults to 'authorize'. see details here: https://developer.paypal.com/docs/api/payments/v1/#payment-create-request-body
-              intent: 'sale', 
-            }
-          );
-          console.log(
-            'nonce: '+nonce,
-            'payerId: '+payerId,
-            'email: ', email,
-            'firstName: '+firstName,
-            'lastName: '+lastName,
-            'phone: '+phone 
-          );
-          this.setState({showSpinner:false});
-          this.storeUserPayment(nonce);
+    console.log('initiatePayment');
+    this.setState({showSpinner:false, modalVisible:true}, ()=> {
+      this.setState({modalVisible:true})
+    });
+  }
+
+  doStripePayment = async() => {
+    console.log(this.state.status);
+    console.log(this.state.values);
+    if(this.state.status) {
+      console.log('valid')
+      this.setState({modalVisible:false, showSpinner:true});
+      const URL = 'https://kanztainer.com/goodyz/api/v1/event/user-stripe-payment';
+      const access_token = await AsyncStorage.getItem('access_token');
+      const header = {
+        headers:{
+          'Authorization':'Bearer '.concat(access_token)
         }
-        catch(ex) {
-          console.log(ex.toString());
+      }
+      console.log(header.headers)
+      const data = {
+        event_id:this.state.data.id,
+        amount:this.state.data.event_fee,
+        card_number:this.state.values.number,
+        card_cvc:this.state.values.cvc,
+        card_expiry_month:this.state.values.expiry.substring(0, 2),
+        card_expiry_year:this.state.values.expiry.substring(3, 6)
+      }
+      console.log(data);
+      axios.post(URL, data, header).then(
+        response=> {
+          console.log(response.data);
           this.setState({showSpinner:false});
+        },
+        error => {
+          console.log(error);
           this.props.navigation.pop();
         }
-      },
-      error => {
-        console.log('error: ',error);
-        this.setState({showSpinner:false});
-        this.props.navigation.pop();
-      }
-    )
+      )
+    }
   }
 
   async storeUserPayment(nonce) {
@@ -192,6 +177,16 @@ export default class QrDetailCmp extends Component {
       error => console.log('store user Payment: ', error)
     )
   }
+
+  _onChange = form => {
+    console.log(form.status)
+    console.log(form.values)
+    if(form.status.cvc == 'valid', form.status.expiry == 'valid', form.status.number == 'valid')
+      this.setState({status:true, values:form.values});
+    else {
+      this.setState({status:false});
+    }
+  };
 
   render(){
     const { mainContainer, btnContainer, spinnerTextStyle, horizontal } = styles;
@@ -225,6 +220,50 @@ export default class QrDetailCmp extends Component {
             isDisable={this.state.isRedeemed}
           />
         </View>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          hardwareAccelerated={true}
+          visible={this.state.modalVisible}
+        >
+					<View style={{height:deviceHeight, width:deviceWidth, justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-end', backgroundColor:'#24242457'}}>
+            <View style={{
+                flexDirection:'column', 
+                height:deviceHeight-500, 
+                width:deviceWidth, 
+                backgroundColor:'#fff', 
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.23,
+                shadowRadius: 2.62,
+                elevation: 4,
+                justifyContent:'center',
+                alignItems:'center'
+              }}
+            >	
+							<View style={{width:'100%', height:20, position:'absolute', top:5, right:5, alignItems:'flex-end'}}>
+								<TouchableOpacity activeOpacity={0.5} onPress={()=> {this.setState({modalVisible:false});this.props.navigation.pop()}}>
+									<FontAwesomeIcon icon={faTimesCircle} size={20} color={color.dark} />
+								</TouchableOpacity>
+							</View>
+              <View style={{marginTop:20, height:300}}>
+                <CreditCardInput onChange={this._onChange} />
+              </View>
+              <Button 
+                btnColor={color.yellow} 
+                textColor={color.dark} 
+                btnName={'PROCEED TO PAY'}
+                borderRadius={50}
+                width={Dimensions.get('screen').width-50}
+                onPress={this.doStripePayment}
+                isDisable={this.state.isRedeemed}
+              />
+            </View>
+          </View>
+        </Modal>
         <View style={horizontal}>
           <Spinner 
             textContent={'Loading...'}
