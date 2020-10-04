@@ -91,6 +91,7 @@ export default class QrDetailCmp extends Component {
       response=> {
         console.log(response.data);
         this.setState({showSpinner:false});
+        // this.initiatePayment();
       },
       error => {
         console.log('checkUserEventPayment: ', error.toString());
@@ -226,10 +227,10 @@ export default class QrDetailCmp extends Component {
           hardwareAccelerated={true}
           visible={this.state.modalVisible}
         >
-					<View style={{height:deviceHeight, width:deviceWidth, justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-end', backgroundColor:'#24242457'}}>
+					<View style={{height:deviceHeight, width:deviceWidth, justifyContent:'flex-start', alignContent:'flex-start', alignItems:'flex-start', backgroundColor:'#24242457'}}>
             <View style={{
                 flexDirection:'column', 
-                height:deviceHeight-500, 
+                height:deviceHeight, 
                 width:deviceWidth, 
                 backgroundColor:'#fff', 
                 shadowColor: "#000",
@@ -240,16 +241,16 @@ export default class QrDetailCmp extends Component {
                 shadowOpacity: 0.23,
                 shadowRadius: 2.62,
                 elevation: 4,
-                justifyContent:'center',
+                justifyContent:'flex-start',
                 alignItems:'center'
               }}
             >	
-							<View style={{width:'100%', height:20, position:'absolute', top:5, right:5, alignItems:'flex-end'}}>
-								<TouchableOpacity activeOpacity={0.5} onPress={()=> {this.setState({modalVisible:false});this.props.navigation.pop()}}>
-									<FontAwesomeIcon icon={faTimesCircle} size={20} color={color.dark} />
-								</TouchableOpacity>
-							</View>
-              <View style={{marginTop:20, height:300}}>
+              <View style={{width:'100%', height:20, position:'absolute', top:5, right:5, alignItems:'flex-end'}}>
+                <TouchableOpacity activeOpacity={0.5} onPress={()=> {this.setState({modalVisible:false});this.props.navigation.pop()}}>
+                  <FontAwesomeIcon icon={faTimesCircle} size={20} color={color.dark} />
+                </TouchableOpacity>
+              </View>
+              <View style={{marginTop:50, height:300}}>
                 <CreditCardInput onChange={this._onChange} />
               </View>
               <Button 
@@ -259,7 +260,6 @@ export default class QrDetailCmp extends Component {
                 borderRadius={50}
                 width={Dimensions.get('screen').width-50}
                 onPress={this.doStripePayment}
-                isDisable={this.state.isRedeemed}
               />
             </View>
           </View>
