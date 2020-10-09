@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Dimensions, ScrollView, Image, AsyncStorage, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, ScrollView, Image, AsyncStorage, Modal, Platform } from 'react-native';
 
 import { ImageCard, Button } from '../common';
 import { color } from '../../constants/theme';
@@ -11,7 +11,7 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { ScaledSheet } from 'react-native-size-matters';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faHistory, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
-import { CreditCardInput, LiteCreditCardInput } from "react-native-credit-card-input";
+import { CreditCardInput } from "react-native-credit-card-input";
 
 const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
 
@@ -51,11 +51,12 @@ export default class QrDetailCmp extends Component {
       showSpinner:false,
       modalVisible: false,
       status:false,
-      values:''
+      values:'',
+      userType:null
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     console.log('event_fee: ', this.state.data.event_fee);
     if(this.state.data.event_fee > 0) {
       this.checkUserEventPayment();
@@ -63,10 +64,13 @@ export default class QrDetailCmp extends Component {
     this.props.navigation.setParams({
       dispatch: this.dispatch.bind(this)
     });
+    const userType = await AsyncStorage.getItem('userType');
+    this.setState({userType: userType});
   }
 
   dispatch() {
-    this.props.navigation.navigate('EventMediaCmp', {id: this.state.data.id});
+    if(this.state.userType != null)
+      this.props.navigation.navigate('EventMediaCmp', {id: this.state.data.id});
   }
 
   gotoDetail = () => {
@@ -74,6 +78,8 @@ export default class QrDetailCmp extends Component {
   }
 
   detail = () => {
+    console.log(this.state.data.offers);
+    return;
     this.props.navigation.navigate('GoodyzListCmp', {data: this.state.data.offers});
   }
 
@@ -245,14 +251,31 @@ export default class QrDetailCmp extends Component {
                 alignItems:'center'
               }}
             >	
-              <View style={{width:'100%', height:20, position:'absolute', top:5, right:5, alignItems:'flex-end'}}>
-                <TouchableOpacity activeOpacity={0.5} onPress={()=> {this.setState({modalVisible:false});this.props.navigation.pop()}}>
-                  <FontAwesomeIcon icon={faTimesCircle} size={20} color={color.dark} />
-                </TouchableOpacity>
-              </View>
-              <View style={{marginTop:50, height:300}}>
-                <CreditCardInput onChange={this._onChange} />
-              </View>
+              {
+                Platform.OS == 'ios'?
+                <>
+                  <View style={{width:'100%', height:20, position:'absolute', top:50, right:10, alignItems:'flex-end'}}>
+                    <TouchableOpacity activeOpacity={0.5} onPress={()=> {this.setState({modalVisible:false});this.props.navigation.pop()}}>
+                      <FontAwesomeIcon icon={faTimesCircle} size={20} color={color.dark} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{marginTop:70, height:300}}>
+                    <CreditCardInput onChange={this._onChange} />
+                  </View>
+                </>
+                :
+                <>
+                  <View style={{width:'100%', height:20, position:'absolute', top:10, right:5, alignItems:'flex-end'}}>
+                    <TouchableOpacity activeOpacity={0.5} onPress={()=> {this.setState({modalVisible:false});this.props.navigation.pop()}}>
+                      <FontAwesomeIcon icon={faTimesCircle} size={20} color={color.dark} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{marginTop:50, height:300}}>
+                    <CreditCardInput onChange={this._onChange} />
+                  </View>
+                </>
+              }
+              
               <Button 
                 btnColor={color.yellow} 
                 textColor={color.dark} 

@@ -11,7 +11,7 @@ import Dialog from "react-native-dialog";
 import axios from 'axios';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 
 
 const {height: deviceHeight, width: deviceWidth} = Dimensions.get('screen');
@@ -126,7 +126,7 @@ export default class Signin extends Component {
         <ScrollView>
           <View style={{position:'absolute', left:10, top:10, zIndex:9}}>
             <TouchableOpacity activeOpacity={0.5} onPress={this.back}>
-              <FontAwesomeIcon icon={faArrowLeft} size={22} color={color.orange} />
+              <FontAwesomeIcon icon={faChevronLeft} size={20} color={color.darkGrey} />
             </TouchableOpacity>
           </View>
           <View style={mainContainer}>

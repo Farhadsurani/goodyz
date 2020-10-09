@@ -8,13 +8,11 @@ import { data } from '../../constants/data';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Dialog from "react-native-dialog";
 import axios from 'axios';
-import qs from 'qs';
 
 import { ScaledSheet } from 'react-native-size-matters';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft,  faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import { requestOneTimePayment, requestBillingAgreement } from 'react-native-paypal';
 
 export default class VoucherDetailCmp extends Component {
 
@@ -47,16 +45,27 @@ export default class VoucherDetailCmp extends Component {
       data:this.props.navigation.getParam('data'),
       showSpinner:false,
       showAlert:false,
+      isUserLogin: false
     }
   }
 
-  componentDidMount(){
-    console.log('is_redeemed: ', this.state.data.is_redeemed)
+  async componentDidMount(){
+    console.log('clicked event id: ', this.state.data.id)
     if(this.state.data.is_redeemed == 1)
       this.setState({isRedeemed: true});
+    if(this.state.data.is_wallet == 1)
+      this.setState({isAddWalletBtn: true});
 
-    console.log('type: ', this.state.type);
-    console.log('data: ', this.state.data)
+    const user = await AsyncStorage.getItem('userType');
+    if(user != null) {
+      this.setState({isUserLogin: true});
+    }
+
+    const userData = JSON.parse(await AsyncStorage.getItem('userData'));
+    var isMyEvent = userData.wallet.find(x=> x.id == this.state.data.id);
+    console.log('wallet length',userData.wallet.length);
+    // console.log('type: ', this.state.type);
+    // console.log('data: ', this.state.data)
   }
 
   gotoDetail = () => {
@@ -74,20 +83,20 @@ export default class VoucherDetailCmp extends Component {
       };
       axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.offer_id+'&is_redeemed=1', access_token).then(
         async(res)=> {
-          console.log(res.data);
+          // console.log(res.data);
           this.setState({isRedeemed:!this.state.isRedeemed, showSpinner:false})
           this.refreshUser(access_token);
         }
       ).catch(
         async(error)=> {
           this.setState({showSpinner: false});
-          console.log('error', error);
+          // console.log('error', error);
           this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
         }
       );
     }
     else {
-      console.log('else')
+      // console.log('else')
     }
   }
 
@@ -107,7 +116,7 @@ export default class VoucherDetailCmp extends Component {
       console.log(access_token, this.state.data.id);
       axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.id+'&is_wallet=1', access_token).then(
         async(res)=> {
-          console.log(res.data);
+          // console.log(res.data);
           this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
           this.refreshUser();
           setTimeout(()=> {
@@ -117,13 +126,13 @@ export default class VoucherDetailCmp extends Component {
       ).catch(
         async(error)=> {
           this.setState({showSpinner: false});
-          console.log('error', error);
+          // console.log('error', error);
           this.setState({showAlert:true, errorMsg:'Something went wrong.'+error, errorTitle:'Error!!'})
         }
       );
     }
     else {
-      console.log('else')
+      // console.log('else')
       this.props.navigation.navigate('WalletCmp')
     }
   }
@@ -138,10 +147,10 @@ export default class VoucherDetailCmp extends Component {
     const url = 'https://kanztainer.com/goodyz/api/v1/me';
     
     axios.post(url, {}, access_token).then(async(res)=> {
-      console.log(res.data.data);
+      // console.log(res.data.data);
       await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
     }).catch((error)=> {
-      console.log('error', error);
+      // console.log('error', error);
     });
   }
 
@@ -193,25 +202,27 @@ export default class VoucherDetailCmp extends Component {
         </ScrollView>
         <View style={btnContainer}>
           {
-            this.state.type == 'addWallet'?
-            <Button 
-              btnColor={color.yellow} 
-              textColor={color.dark} 
-              btnName={this.state.isAddWalletBtn?'GO TO WALLET':'ADD TO WALLET'} 
-              borderRadius={50} 
-              width={Dimensions.get('screen').width-50}
-              onPress={this.addToWallet}
-            />
-            :
-            <Button 
-              btnColor={color.yellow} 
-              textColor={color.dark} 
-              btnName={this.state.isRedeemed?'REDEEMED':'REDEEM'} 
-              borderRadius={50} 
-              width={Dimensions.get('screen').width-50}
-              onPress={this.redeem}
-              isDisable={this.state.isRedeemed}
-            />
+            this.state.isUserLogin?
+              this.state.type == 'addWallet'?
+              <Button 
+                btnColor={color.yellow} 
+                textColor={color.dark} 
+                btnName={this.state.isAddWalletBtn?'GO TO WALLET':'ADD TO WALLET'} 
+                borderRadius={50} 
+                width={Dimensions.get('screen').width-50}
+                onPress={this.addToWallet}
+              />
+              :
+              <Button 
+                btnColor={color.yellow} 
+                textColor={color.dark} 
+                btnName={this.state.isRedeemed?'REDEEMED':'REDEEM'} 
+                borderRadius={50} 
+                width={Dimensions.get('screen').width-50}
+                onPress={this.redeem}
+                isDisable={this.state.isRedeemed}
+              />
+              : null
           }
           <View style={horizontal}>
           <Spinner 

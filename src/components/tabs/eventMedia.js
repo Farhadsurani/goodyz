@@ -72,8 +72,10 @@ export default class EventMediaCmp extends Component {
 	}
 
 	openGallery = () => {
-    this.chooseImage();
     this.setState({modalVisible: false});
+    setTimeout(()=> {
+      this.chooseImage();
+    }, 100)
 	}
 	
 	chooseImage = () => {
@@ -84,7 +86,7 @@ export default class EventMediaCmp extends Component {
       },
     };
     ImagePicker.launchImageLibrary(options, (response) => {
-      console.log('Response = ', response);
+      // console.log('Response = ', response);
 
       if (response.didCancel) {
         console.log('User cancelled image picker');
@@ -92,11 +94,11 @@ export default class EventMediaCmp extends Component {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
+        // alert(response.customButton);
       } else {
         // const source = { uri: response.uri };
         this.resize(response.uri)
-        console.log('response', JSON.stringify(response));
+        // console.log('response', JSON.stringify(response));
       }
     });
   }

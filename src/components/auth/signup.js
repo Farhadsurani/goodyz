@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, ScrollView, Text, Dimensions, TouchableOpacity, AsyncStorage, Alert } from "react-native";
+import { View, Image, ScrollView, Text, Dimensions, TouchableOpacity, AsyncStorage, Alert, Platform } from "react-native";
 
 import { images, color } from '../../constants/theme';
 import { FloatingInput, Button } from '../common';
@@ -34,11 +34,11 @@ export default class Signup extends Component {
   constructor(props){
     super(props);
     this.state = {
-      name:'hello',
+      name:'',
       image:'',
-      email:'hello@hello.com',
-      password:'hello1',
-      password_confirmation:'hello1',
+      email:'',
+      password:'',
+      password_confirmation:'',
       device_token:'123456',
       device_type:'android',
       isError:false,
@@ -226,7 +226,7 @@ export default class Signup extends Component {
         </RNCamera>
         :
         <View style={mainContainer}>
-          <TouchableOpacity activeOpacity={0.5} style={{position:'absolute', left:10, top:10}} onPress={()=> this.props.navigation.pop()}>
+          <TouchableOpacity activeOpacity={0.5} style={{position:'absolute', left:10, top:Platform.OS=='ios'?40:10}} onPress={()=> this.props.navigation.pop()}>
             <FontAwesomeIcon icon={faChevronLeft} size={20} color={color.darkGrey} />
           </TouchableOpacity>
 
