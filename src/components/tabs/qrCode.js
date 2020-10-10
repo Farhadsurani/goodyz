@@ -35,7 +35,7 @@ export default class QrCodeCmp extends Component {
     // const userType = await AsyncStorage.getItem('userType');
     // if(userType == 'user')
       setTimeout(()=> {
-        this.onSuccess({type:'offer', id:27})
+        this.onSuccess({type:'offer', id:22})
       }, 2000)
   }
 
@@ -57,25 +57,46 @@ export default class QrCodeCmp extends Component {
     // console.log(parseQrData.type, parseQrData.id)
     // console.log('https://kanztainer.com/goodyz/api/v1/events/'+parseQrData.id);
 
+    const access_token = await AsyncStorage.getItem('access_token');
+    const header = {
+      headers:{
+        'Authorization':'Bearer '.concat(access_token)
+      }
+    }
+
     this.setState({showSpinner:true});
-    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+e.id).then((res)=> {
+    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+e.id, header).then(async(res)=> {
       this.setState({showSpinner:false});
       // setTimeout(()=> {
       //   this.scanner.reactivate();
       // }, 3000)
       // console.log(res.data);
+      await AsyncStorage.setItem('offers', JSON.stringify(res.data));
       if(e.type == 'offer')
         this.props.navigation.navigate('QrDetailCmp', {data: res.data});
-      // else
-      //   this.props.navigation.navigate('AnalyticsCmp');
+      else
+        this.props.navigation.navigate('AnalyticsCmp');
 
     }).catch((error)=> {
-      this.setState({showSpinner:false});
       // console.log('error', error);
-      this.setState({showAlert:true, errorMsg:'Something went wrong. '+error, errorTitle:'Error!!'});
-      setTimeout(()=> {
-        this.scanner.reactivate();
-      }, 5000)
+      if(error.toString().includes('401')) {
+        axios.post('https://kanztainer.com/goodyz/api/v1/refresh', {}, header).then(
+          async response => {
+            await AsyncStorage.setItem('access_token', response.data.data.user.access_token)
+            this.onSuccess(e);
+          },
+          error => {
+            console.log('refresh token error: ', error);
+            this.setState({showSpinner:false});
+          }
+        );
+      }
+      else{
+        this.setState({showSpinner:false, showAlert:true, errorMsg:'Something went wrong. '+error, errorTitle:'Error!!'});
+        setTimeout(()=> {
+          this.scanner.reactivate();
+        }, 5000)
+      }
     });
   };
 

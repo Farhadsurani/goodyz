@@ -38,6 +38,13 @@ export default class GoodyzListCmp extends Component {
     }
   }
 
+  async componentDidMount() {
+    this.focusListener = this.props.navigation.addListener("didFocus", async() => {
+      const offers = JSON.parse(await AsyncStorage.getItem('offers'));
+      this.setState({data: offers.data.offers});
+    });
+  }
+
   trimText(string) {
     return string.substring(0, 110)+'...';
   }

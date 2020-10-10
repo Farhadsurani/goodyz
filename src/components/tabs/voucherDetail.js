@@ -50,26 +50,45 @@ export default class VoucherDetailCmp extends Component {
   }
 
   async componentDidMount(){
-    console.log('clicked event id: ', this.state.data.id)
-    if(this.state.data.is_redeemed == 1)
-      this.setState({isRedeemed: true});
-    if(this.state.data.is_wallet == 1)
-      this.setState({isAddWalletBtn: true});
+    console.log('user impressions: ', this.state.type, this.state.data.pivot.event_id)
+    if(this.state.type == 'addWallet'){
+      if(this.state.data.user_impression != null){
+        if(this.state.data.user_impression.is_redeemed == 1)
+          this.setState({isRedeemed: true});
+        if(this.state.data.user_impression.is_wallet == 1)
+          this.setState({isAddWalletBtn: true});
+      }
+    }
+    else {
+      console.log('else', this.state.data.is_redeemed)
+      if(this.state.data.is_redeemed == 1)
+        this.setState({isRedeemed: true});
+      if(this.state.data.is_wallet == 1)
+        this.setState({isAddWalletBtn: true});
+    }
 
     const user = await AsyncStorage.getItem('userType');
     if(user != null) {
       this.setState({isUserLogin: true});
     }
-
-    const userData = JSON.parse(await AsyncStorage.getItem('userData'));
-    var isMyEvent = userData.wallet.find(x=> x.id == this.state.data.id);
-    console.log('wallet length',userData.wallet.length);
-    // console.log('type: ', this.state.type);
-    // console.log('data: ', this.state.data)
   }
 
   gotoDetail = () => {
     console.log('gotoDetails')
+  }
+
+  refreshEventData = async e => {
+    const access_token = await AsyncStorage.getItem('access_token');
+    const header = {
+      headers:{
+        'Authorization':'Bearer '.concat(access_token)
+      }
+    }
+    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+e.id, header).then(async(res)=> {
+      await AsyncStorage.setItem('offers', JSON.stringify(res.data));
+    }).catch((error)=> {
+      console.log('error', error);
+    });
   }
 
   redeem = async() => {
@@ -83,9 +102,10 @@ export default class VoucherDetailCmp extends Component {
       };
       axios.get('https://kanztainer.com/goodyz/api/v1/offer-add-impression?offer_id='+this.state.data.offer_id+'&is_redeemed=1', access_token).then(
         async(res)=> {
-          // console.log(res.data);
+          console.log(res.data);
           this.setState({isRedeemed:!this.state.isRedeemed, showSpinner:false})
           this.refreshUser(access_token);
+          this.refreshEventData({id:this.state.data.pivot.event_id});
         }
       ).catch(
         async(error)=> {
@@ -119,6 +139,7 @@ export default class VoucherDetailCmp extends Component {
           // console.log(res.data);
           this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
           this.refreshUser();
+          this.refreshEventData({id:this.state.data.pivot.event_id});
           setTimeout(()=> {
             this.setState({isAddWalletMsg:false})
           }, 5000)
@@ -147,10 +168,10 @@ export default class VoucherDetailCmp extends Component {
     const url = 'https://kanztainer.com/goodyz/api/v1/me';
     
     axios.post(url, {}, access_token).then(async(res)=> {
-      // console.log(res.data.data);
+      console.log(res.data.data);
       await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
     }).catch((error)=> {
-      // console.log('error', error);
+      console.log('error', error);
     });
   }
 

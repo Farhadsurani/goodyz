@@ -64,8 +64,9 @@ export default class QrDetailCmp extends Component {
     this.props.navigation.setParams({
       dispatch: this.dispatch.bind(this)
     });
+    const offers = JSON.parse(await AsyncStorage.getItem('offers')).data;
     const userType = await AsyncStorage.getItem('userType');
-    this.setState({userType: userType});
+    this.setState({userType: userType, data:offers});
   }
 
   dispatch() {
@@ -78,8 +79,6 @@ export default class QrDetailCmp extends Component {
   }
 
   detail = () => {
-    console.log(this.state.data.offers);
-    return;
     this.props.navigation.navigate('GoodyzListCmp', {data: this.state.data.offers});
   }
 
