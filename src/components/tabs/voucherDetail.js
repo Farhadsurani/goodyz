@@ -50,7 +50,7 @@ export default class VoucherDetailCmp extends Component {
   }
 
   async componentDidMount(){
-    console.log('user impressions: ', this.state.type, this.state.data.pivot.event_id)
+    console.log('user impressions: ', this.state.type)
     if(this.state.type == 'addWallet'){
       if(this.state.data.user_impression != null){
         if(this.state.data.user_impression.is_redeemed == 1)
@@ -105,7 +105,10 @@ export default class VoucherDetailCmp extends Component {
           console.log(res.data);
           this.setState({isRedeemed:!this.state.isRedeemed, showSpinner:false})
           this.refreshUser(access_token);
-          this.refreshEventData({id:this.state.data.pivot.event_id});
+          this.state.type == 'addWallet'?
+            this.refreshEventData({id:this.state.data.pivot.event_id})
+            :
+            this.refreshEventData({id:this.state.data.offer_id})
         }
       ).catch(
         async(error)=> {
@@ -139,7 +142,10 @@ export default class VoucherDetailCmp extends Component {
           // console.log(res.data);
           this.setState({showSpinner:false, isAddWalletMsg:true, isAddWalletBtn:true});
           this.refreshUser();
-          this.refreshEventData({id:this.state.data.pivot.event_id});
+          this.state.type == 'addWallet'?
+            this.refreshEventData({id:this.state.data.pivot.event_id})
+            :
+            this.refreshEventData({id:this.state.data.offer_id})
           setTimeout(()=> {
             this.setState({isAddWalletMsg:false})
           }, 5000)
