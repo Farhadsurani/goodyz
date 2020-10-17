@@ -34,9 +34,9 @@ export default class QrCodeCmp extends Component {
     // axios.defaults.headers.post['Content-Type'] = 'application/json';
     // const userType = await AsyncStorage.getItem('userType');
     // if(userType == 'user')
-      // setTimeout(()=> {
-      //   this.onSuccess({type:'offer', id:22})
-      // }, 2000)
+      setTimeout(()=> {
+        this.onSuccess({type:'offer', id:22})
+      }, 2000)
   }
 
   handleCancel() {
@@ -53,7 +53,7 @@ export default class QrCodeCmp extends Component {
 
   onSuccess = async e => {
     // console.log('onSuccess', e.data);
-    const parseQrData = JSON.parse(e.data);
+    // const parseQrData = JSON.parse(e.data);
     // console.log(parseQrData.type, parseQrData.id)
     // console.log('https://kanztainer.com/goodyz/api/v1/events/'+parseQrData.id);
 
@@ -65,14 +65,14 @@ export default class QrCodeCmp extends Component {
     }
 
     this.setState({showSpinner:true});
-    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+parseQrData.id, header).then(async(res)=> {
+    axios.get('https://kanztainer.com/goodyz/api/v1/events/'+e.id, header).then(async(res)=> {
       this.setState({showSpinner:false});
       // setTimeout(()=> {
       //   this.scanner.reactivate();
       // }, 3000)
       // console.log(res.data);
       await AsyncStorage.setItem('offers', JSON.stringify(res.data));
-      if(parseQrData.type == 'offer')
+      if(e.type == 'offer')
         this.props.navigation.navigate('QrDetailCmp', {data: res.data});
       else
         this.props.navigation.navigate('AnalyticsCmp');

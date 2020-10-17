@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity, Image, Dimensions, AsyncStorage, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions, AsyncStorage, FlatList, ScrollView } from 'react-native';
 
+import { ImageCard } from '../common';
 import { color, images } from '../../constants/theme';
 
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -44,7 +45,8 @@ export default class ProfileCmp extends Component {
     this.state = {
       showSpinner:false,
       showAlert:false,
-      userData:''
+      userData:'',
+      today_events:[]
     }
   }
 
@@ -56,7 +58,8 @@ export default class ProfileCmp extends Component {
         this.props.navigation.pop();
         this.props.navigation.navigate('Signin');
       }
-      // console.log(isUserLogedIn);
+      else 
+        this.refreshUser();
     });
   }
 
@@ -67,14 +70,33 @@ export default class ProfileCmp extends Component {
         return false;
       else{
         const user = await AsyncStorage.getItem('userData');
-        this.setState({userData: JSON.parse(user)});
-        console.log(this.state.userData.details.image_url);
+        this.setState({userData: JSON.parse(user), today_events:JSON.parse(user).today_events});
         return true;
       }
     } 
     catch(e) {
       console.log(e);
     }
+  }
+
+  async refreshUser() {
+    const user_access_token = await AsyncStorage.getItem('access_token');
+    let access_token = {
+      headers: {
+        'Authorization': 'Bearer '.concat(user_access_token)
+      }
+    };
+    const url = 'https://kanztainer.com/goodyz/api/v1/me';
+    axios.post(url, {}, access_token).then(async(res)=> {
+      console.log('res.data.data.today_events');
+      console.log(res.data.data.today_events);
+      await AsyncStorage.setItem('userData', JSON.stringify(res.data.data));
+      this.setState({userData: res.data.data, today_events:res.data.data.today_events});
+      console.log('this.state.today_events');
+      console.log(this.state.today_events);
+    }).catch((error)=> {
+      console.log('error', error);
+    });
   }
 
   handleCancel() {
@@ -113,11 +135,10 @@ export default class ProfileCmp extends Component {
     );
   }
 
-  render(){
-    const { mainContainer, profilePicture, profileName, profileEmail, hrLine, horizontal, spinnerTextStyle } = styles;
-
-    return(
-      <View style={mainContainer}>
+  renderHeader = () => {
+    const { profilePicture, profileName, profileEmail, hrLine } = styles;
+    return (
+      <View style={{ width:deviceWidth-20, alignItems:'center' }} >
         {
           this.state.userData != '' ?
           <>
@@ -150,6 +171,43 @@ export default class ProfileCmp extends Component {
             </View>
           </TouchableOpacity>
         </View>
+      </View>
+    )
+  }
+
+  renderData = (item) => {
+    const { cardContainer } = styles;
+    return(
+      <View style={cardContainer}>
+        <ImageCard 
+          logo={{uri:item.item.event.logo_url}} 
+          text={item.item.event.name}
+          bigImage={{uri:item.item.event.banner_image_url}}
+          isRedeemed={item.item.event.is_redeemed}
+          onPress={() => this.detail(item.item.event)}
+          isDetail={false}
+          description={item.item.event.description}
+          height={200}
+        />
+      </View>
+    )
+  }
+  
+  detail(data) {
+    this.props.navigation.navigate('GoodyzListCmp', {data: data.offers});
+  }
+
+  render(){
+    const { mainContainer, horizontal, spinnerTextStyle } = styles;
+
+    return(
+      <View style={mainContainer}>
+        <FlatList
+          ListHeaderComponent= {this.renderHeader}
+          data={this.state.today_events}
+          renderItem={this.renderData}
+          keyExtractor={(item, index) => index.toString()}
+        />
         <View style={horizontal}>
           <Spinner 
             textContent={'Loading...'}
@@ -177,7 +235,7 @@ const styles = ScaledSheet.create({
     alignItems:'center',
     height: deviceHeigth,
     padding:10,
-    backgroundColor:color.ligth
+    backgroundColor:color.ligth,
   },
   profilePicture:{
     height:100,
@@ -206,5 +264,11 @@ const styles = ScaledSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF'
-  }
+  },
+  cardContainer:{
+    backgroundColor:color.ligth,
+    marginBottom:20,
+    justifyContent:'center',
+    alignItems:'center'
+  },
 })

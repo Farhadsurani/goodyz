@@ -58,9 +58,11 @@ export default class QrDetailCmp extends Component {
 
   async componentDidMount() {
     console.log('event_fee: ', this.state.data.event_fee);
-    if(this.state.data.event_fee > 0) {
-      this.checkUserEventPayment();
-    }
+    if(this.state.data.event_fee > 0)
+      this.checkUserEventPayment(); 
+    else
+      this.markUserEvent();
+    
     this.props.navigation.setParams({
       dispatch: this.dispatch.bind(this)
     });
@@ -83,7 +85,7 @@ export default class QrDetailCmp extends Component {
   }
 
   async checkUserEventPayment() {
-    console.log('this.checkUserEventPayment')
+    console.log('this.checkUserEventPayment');
     // this.setState({showSpinner:true});
     const URL = 'https://kanztainer.com/goodyz/api/v1/event/check-user-payment/'+this.state.data.id;
     const access_token = await AsyncStorage.getItem('access_token');
@@ -152,6 +154,7 @@ export default class QrDetailCmp extends Component {
         response=> {
           console.log(response.data);
           this.setState({showSpinner:false});
+          this.markUserEvent();
         },
         error => {
           console.log(error);
@@ -159,6 +162,25 @@ export default class QrDetailCmp extends Component {
         }
       )
     }
+  }
+
+  async markUserEvent() {
+    console.log('markUserEvent(): ', this.state.data.id);
+    const access_token = await AsyncStorage.getItem('access_token');
+    const URL = 'https://kanztainer.com/goodyz/api/v1/event/mark-user-event/'+this.state.data.id;
+    const header = {
+      headers:{
+        'Authorization':'Bearer '.concat(access_token)
+      }
+    }
+    axios.get(URL, header).then(
+      response=> {
+        console.log(response.data);
+      },
+      error => {
+        console.log(error);
+      }
+    );
   }
 
   async storeUserPayment(nonce) {
